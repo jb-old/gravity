@@ -1,16 +1,18 @@
 #!/usr/bin/env python3.1
+
+""" for when you need only bmp "
+"" by <jeremy@jeremybanks.ca> ""
+" released under mit license """
+
 """
-                           
- i          (jeremy banks) 
- get annoyed at the format 
- BMP and finally made this 
-                           
- here you go, mit licensed 
-                           
 i often find myself wanting to output image files and wanting to avoid
 much in the way of dependencies. the easiest solution that's
 widely-supported (and consequently easy to convert to other formats)
 is the 24-bit windows bitmap image.
+
+this module provides a couple of functions for writing 24-bit (RGB) and
+32-bit (RGBA) bitmap images. 
+"""
 
 here's what the header looks like. i've included "default" values,
 which are what you'll probably be using. all values are little-edian
@@ -46,11 +48,9 @@ things to keep in mind about the data itself:
 here follows a simple python script 3 that outputs a bitmap image file.
 
 """
-
-import sys
 import struct
 
-HEADER_FORMAT = ( "2s" # magic number
+WINDOWS_BITMAP_HEADER = ( "2s" # magic number
                   "I"  # file size
                   "4x" # (reserved/unused)
                   "II" # 54, 40
@@ -96,6 +96,5 @@ def main():
                                   [ WHITE, BLACK, WHITE ] ])
 
 if __name__ == "__main__":
-    main()
-
-
+    import sys
+    sys.exit(main(*sys.argv[1:]))
