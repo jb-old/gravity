@@ -1,20 +1,20 @@
+#!/usr/bin/env python3.1
 """
                            
  i          (jeremy banks) 
- hate the bmp image format 
- and so i made these notes 
+ get annoyed at the format 
+ BMP and finally made this 
                            
  here you go, mit licensed 
                            
-
 i often find myself wanting to output image files and wanting to avoid
 much in the way of dependencies. the easiest solution that's
 widely-supported (and consequently easy to convert to other formats)
 is the 24-bit windows bitmap image.
 
-first, here's what the header looks like. i've included the "default"
-values generally used, in ASCII, hex or as a number. all numbers are
-little-edian and unsigned unless otherwise indicated.
+here's what the header looks like. i've included "default" values,
+which are what you'll probably be using. all values are little-edian
+and unsigned unless otherwise indicated.
 
   size default description
   ---- ------- -----------
@@ -35,7 +35,7 @@ little-edian and unsigned unless otherwise indicated.
    4 B    0    number of "important" colors in color palette
  (54 B total)
 
-the bitmap data itself is a pain in a few ways:
+things to keep in mind about the data itself:
  - the number of bytes in each each row of the image must be padded to
    a multiple of four
  - the rows are stored "upside-down" by default, but we don't do this
@@ -43,48 +43,49 @@ the bitmap data itself is a pain in a few ways:
  - for 24-bit images, the byte order is blue-green-red, i think alpha
    is on the end for 32-bit.
 
-here follows a simple python script 3 that outputs a bmp.
+here follows a simple python script 3 that outputs a bitmap image file.
 
 """
 
 import sys
 import struct
 
-24BBMP_HEADER_FORMAT = ( "2s" # magic number
-                         "I" # file size
-                         "4x" # (reserved/unused)
-                         "I" # 54
-                         "I" # 40
-                         "i" # width
-                         "i" # -height
-                         "H" # 1
-                         "H" # 24
-                         "I" # 0
-                         "I" # bitmap data size (bytes)
-                         "i" # 0
-                         "i" # 0
-                         "I" # 0
-                         "I")# 0
+HEADER_FORMAT = ( "2s" # magic number
+                  "I"  # file size
+                  "4x" # (reserved/unused)
+                  "II" # 54, 40
+                  "ii" # width, -height
+                  "HHI" # 1, 24, 0
+                  "I"  # bitmap data size (bytes)
+                  "iiII") # 0, 0, 0, 0
 
 def write_24bbmp(stream, dimensions, data):
     """dimensions should be (width, height)
        data should be r, g, b = data[y][x]"""
     
     width, height = dimensions
+    row_bytes = width * 3
     
-    if width % 4 == 0:
+    if row_bytes % 4 == 0:
         row_padding = 0
     else:
-        row_padding = 4 - (width % 4)
-
+        row_padding = 4 - (row_bytes % 4)
+    
     data_size = 3 * height * (width + row_padding)
     file_size = data_size + 54
     
-    stream.write(struct.pack(24BBMP_HEADER_FORMAT,
+    stream.write(struct.pack(HEADER_FORMAT,
                              "BM", file_size, 54,
                              50, width, -height, 1,
                              24, 0, data_size, 0,
                              0, 0, 0))
+    
+    for y in range(height):
+        for x in range(width):
+            BGR = reversed(data[y][x])
+            stream.write(bytes(BGR))
+        for i in range(row_padding):
+            stream.write(b"-")
 
 def main():
     WHITE = (255, 255, 255)
