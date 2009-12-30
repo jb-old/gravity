@@ -20,7 +20,7 @@ and unsigned unless otherwise indicated.
   ---- ------- -----------
    2 B  'BM'   "magic number" file type identifier
    4 B         file size (bytes)
-   4 B         reserved/unused
+   4 B    0    reserved/unused
    4 B   54    offset of bitmap data
    4 B   40    size (bytes) of second part of header
    4 B         (signed) width of image
