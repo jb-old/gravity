@@ -67,15 +67,15 @@ BPP = 3 # bytes-per-pixel
 def _24b_bmp_header(width, height):
     # 18[4] and 22[4] are signed width and height
     return (b'BM~\r\x00\x00\x00\x00\x00\x006\x00\x00\x00('
-            b'\x00\x00\x00' + struct.pack("i", width) +
-            struct.pack("i", height) +b'\x01\x00\x18\x00\x00\x00\x00\x00H\r')
+            b'\x00\x00\x00!' + struct.pack("i", width) +
+            struct.pack("i", height) +b'\x00\x18\x00\x00\x00\x00\x00H\r\x00\x00')
 
 def main(size=36):
     if size % 4:
         size += size - (size % 4)
         # size rounded up to multiple of four
     
-    image_data = bytearray(BPP * size ** 2) # black bitmap data
+    image_data = bytearray([255, 255, 0]) * size ** 2 # black bitmap data
     
     def light(position, color):
         if not all(0 <= p < size for p in position):
