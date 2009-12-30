@@ -1,6 +1,9 @@
 #!/usr/bin/env python3.1
 import sys
 import struct
+import math
+
+"""Generates a 24b bitmap image of the thingie."""
 
 class RGBA_Gradient(object):
     def __init__(self, data):
@@ -59,20 +62,23 @@ mah_spectrum = RGBA_Gradient([ (  0, (.5, 0,.5, 0)),
                                (2/3, ( 0,.5,.5, 1)),
                                (5/6, ( 0, 0, 1, 1)),
                                (  1, (.5, 0,.5, 0)) ])
-BPP = 4 # bytes-per-pixel
+BPP = 3 # bytes-per-pixel
 
-def 24b_bmp_header(width, height):
-    return b""
+def _24b_bmp_header(width, height):
+    # 18[4] and 22[4] are signed width and height
+    return (b'BM~\r\x00\x00\x00\x00\x00\x006\x00\x00\x00('
+            b'\x00\x00\x00' + struct.pack("i", width) +
+            struct.pack("i", height) +b'\x01\x00\x18\x00\x00\x00\x00\x00H\r')
 
 def main(size=36):
     if size % 4:
         size += size - (size % 4)
         # size rounded up to multiple of four
     
-    image_data = bytearray(BPP * SIZE ** 2) # black bitmap data
+    image_data = bytearray(BPP * size ** 2) # black bitmap data
     
-    def lighten(position, color):
-        if not all(0 <= p < SIZE for p in position):
+    def light(position, color):
+        if not all(0 <= p < size for p in position):
             return # out of bounds
         
         r, g, b, a = color
@@ -82,13 +88,14 @@ def main(size=36):
         r, g, b = r * a, g * a, b * a
         
         for channel, value in enumerate((r, g, b)):
-            i = int(BBP * (x + y * SIZE)) + channel)
+            i = int(BPP * (x + (size - 1 - y) * size) + channel)
+            # bitmaps are upside down (why the (size - 1 - y))
             image_data[i] = max(image_data[i], value)
     
-    def speck(position, rgb):
-        full = rgb + (1  ,)
-        half = rgb + (1/2,)
-        qrtr = rgb + (1/4,)
+    def speck(position, color):
+        full = color
+        half = color[1:4] + (int(color[3] * 1/2),)
+        qrtr = color[1:4] + (int(color[3] * 1/4),)
         
         x, y = position
         
@@ -102,19 +109,20 @@ def main(size=36):
         light([ x + 1, y - 1], qrtr)
         light([ x + 1, y + 1], qrtr)
 
-    import math
-    
     theta = 0
     
     while theta < 2 * math.pi:
-        x = SIZE / 2 + SIZE / 3 * math.cos(theta)
-        y = SIZE / 2 + SIZE / 3 * math.sin(theta)
-        speck([x, y], [255, 255, 255])
+        x = size / 2 + size / 3 * math.cos(theta)
+        y = size / 2 + size / 3 * math.sin(theta)
+        print(theta, mah_spectrum(theta))
+        speck([x, y], mah_spectrum(theta))
 
         theta += 0.5
 
-    sys.stdout.write(24b_bmp_header(size, size))
-    sys.stdout.write(image_data)
+    out = open("out.bmp", "wb")
+    out.write(_24b_bmp_header(size, size))
+    out.write(image_data)
+    print("Yo")
     
 if __name__ == "__main__":
     sys.exit(main(*sys.argv[1:]))
