@@ -19,10 +19,12 @@ try:
     from dubious import Object
 except ImportError:
     class Object(object):
-        __init__ = lambda self, *a, **kw: self.initialize(*a, **kw)
+        """Provides the minimum of the dubious.Object interface required"""
+        
+        __init__    = lambda self, *a, **kw: self.initialize(*a, **kw)
         __getitem__ = lambda self, key: self.get_item(key)
         __setitem__ = lambda self, key, value: self.set_item(key, value)
-        __call__ = lambda self, *a, **kw: self.call(*a, **kw)
+        __call__    = lambda self, *a, **kw: self.call(*a, **kw)
 
 from struct import Struct
 
@@ -254,10 +256,17 @@ def main():
 
     print("Image instantiated.")
     
+    while theta < 3 / 2 * math.pi:
+        x = size / 2 + size / 3 * math.cos(theta - 1)
+        y = size / 2 + size / 3 * math.sin(theta - 1)
+
+        r, g, b, a = mah_spectrum(theta / (3 / 2 * math.pi))
+        image.speck([x, y], [r, g, b], a)
+
+        theta += 0.1
+    
     for p in range(size + 1):
         r, g, b, a = mah_spectrum(p / size)
-        print("{:3d}, {:3d} ({:2f}) | {:2f} {:2f} {:2f} | {:2f}"
-              .format(p, p, p / size, r, g, b, a))
         image.speck([p, p], [r, g, b], a)
     
     print("Image generated.")
