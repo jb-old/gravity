@@ -28,11 +28,11 @@ from struct import Struct
 
 # Pens are applied on a per-channel basis.
 PEN_REPLACE = lambda old, new: new
-PEN_ADD = lambda old, new: old + new
-PEN_MIN = lambda old, new: min(old, new)
-PEN_MAX = lambda old, new: max(old, new)
-PEN_DIFF = lambda old, new: abs(old - new)
-PEN_XOR = lambda old, new: old ^ new
+PEN_ADD     = lambda old, new: old + new
+PEN_MIN     = lambda old, new: min(old, new)
+PEN_MAX     = lambda old, new: max(old, new)
+PEN_DIFF    = lambda old, new: abs(old - new)
+PEN_XOR     = lambda old, new: old ^ new
 
 class Raster(Object):
     default_pen = PEN_REPLACE
@@ -49,8 +49,7 @@ class Raster(Object):
     
     def get_item(self, x_y):
         x, y = x_y
-        x, y = int(x), int(y)
-
+        
         if x < 0 or x >= self.width or y < 0 or y >= self.height:
             return None
 
@@ -60,7 +59,6 @@ class Raster(Object):
     
     def set_item(self, x_y, color):
         x, y = x_y
-        x, y = int(x), int(y)
         
         if x < 0 or x >= self.width or y < 0 or y >= self.height:
             return
@@ -69,6 +67,21 @@ class Raster(Object):
         
         self.data[i:i + self.color_fmt.size] = self.color_fmt.pack(*color)
 
+    def speck(self, coordinates, color, not_darkness=1, pen=None):
+        pen = pen or self.pen
+        x, y = coordinates
+        
+        self.point(coordinates, color, not_darkness, pen)
+        
+        self.point((x, y - 1), color, not_darkness / 2, pen)
+        self.point((x - 1, y), color, not_darkness / 2, pen)
+        self.point((x + 1, y), color, not_darkness / 2, pen)
+        self.point((x, y + 1), color, not_darkness / 2, pen)
+        
+        self.point((x - 1, y - 1), color, not_darkness / 4, pen)
+        self.point((x - 1, y + 1), color, not_darkness / 4, pen)
+        self.point((x + 1, y - 1), color, not_darkness / 4, pen)
+        self.point((x + 1, y + 1), color, not_darkness / 4, pen)
 
                               # type # value # description
                               # ---- # ----- # -----------
@@ -109,29 +122,20 @@ class Raster_24RGB(Raster):
     color_fmt = Struct("BBB")
     default_fill = 0, 0, 0
     
-    def point(self, coordinates, color, opacity=1, pen=None):
+    def point(self, coordinates, color, not_darkness=1, pen=None):
         pen = pen or self.pen
-        x, y = coordinates
+        coordinates = [ int(_) for _ in coordinates ]
 
+        # colors may be given as floats (0 to 1)
+        # or as integers (0 to 255)
+        
+        if isinstance(color[0], float):
+            color = [ int(c * 255 * not_darkness) for c in color ]
+        elif not_darkness != 1: # assumed int
+            color = [ int(c * not_darkness) for c in color ]
         self[coordinates] = [ int(pen(old, color[channel]))
                               for channel, old
                               in enumerate(self[coordinates]) ]
-    
-    def speck(self, coordinates, color, opacity=1, pen=None):
-        pen = pen or self.pen
-        x, y = coordinates
-        
-        self.point(coordinates, color, opacity, pen)
-        
-        self.point((x, y - 1), color, opacity / 2, pen)
-        self.point((x - 1, y), color, opacity / 2, pen)
-        self.point((x + 1, y), color, opacity / 2, pen)
-        self.point((x, y + 1), color, opacity / 2, pen)
-        
-        self.point((x - 1, y - 1), color, opacity / 4, pen)
-        self.point((x - 1, y + 1), color, opacity / 4, pen)
-        self.point((x + 1, y - 1), color, opacity / 4, pen)
-        self.point((x + 1, y + 1), color, opacity / 4, pen)
     
     def write_bmp(self, file, offset=0):
         row_bytes = self.width * 3
@@ -214,7 +218,7 @@ class RGBA_Gradient(object):
         return result
 
 # fades out to purple on either end, runs the RGB spectrum between, so
-# that all channels will be available at full opacity. this is so that
+# that all channels will be available at full not_darkness. this is so that
 # i can take the min for each channel when painting a new color and
 # have something which remains in the same point for the complete
 # duration appear white.
@@ -236,12 +240,12 @@ def main():
 
     print("Image instantiated.")
     
-    while theta < 2 * math.pi:
+    while theta < 3 / 4 * math.pi:
         x = size / 2 + size / 3 * math.cos(theta)
         y = size / 2 + size / 3 * math.sin(theta)
-        
+
         r, g, b, a = mah_spectrum(theta % 1)
-        image.speck([x, y], [r * 255, g * 255, b * 255], a)
+        image.speck([x, y], [r, g, b], a)
         
         theta += 0.1
     
