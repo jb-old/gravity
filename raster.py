@@ -35,7 +35,7 @@ PEN_DIFF    = lambda old, new: abs(old - new)
 PEN_XOR     = lambda old, new: old ^ new
 
 class Raster(Object):
-    default_pen = PEN_REPLACE
+    default_pen = staticmethod(PEN_REPLACE)
     
     def initialize(self, width, height, fill=None, pen=None):
         if fill is None:
