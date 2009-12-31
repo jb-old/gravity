@@ -212,13 +212,20 @@ class RGBA_Gradient(object):
         # otherwise...
         second_point, second_color = self.data[first_index + 1]
 
-        first_balance = (point - first_point) / (second_point - first_point)
-        second_balance = 1 - first_balance
+        if first_point == second_point:
+            # partically covering an edge I don't touch
+            
+            first_balance = second_balance = 1/2
+        else:
+            first_balance = (point - first_point) / (second_point - first_point)
+            second_balance = 1 - first_balance
 
+        first_balance, second_balance = second_balance, first_balance
+        
         result = tuple( first_balance * first +
                         second_balance * second for first, second in zip(first_color,
                                                                          second_color) )
-
+        
         return result
 
 # fades out to purple on either end, runs the RGB spectrum between, so
@@ -227,13 +234,13 @@ class RGBA_Gradient(object):
 # have something which remains in the same point for the complete
 # duration appear white.
                              # point,( r, g, b, a)
-mah_spectrum = RGBA_Gradient([ (  0, (.5, 0,.5, 0)),
+mah_spectrum = RGBA_Gradient([ (0/6, (.5, 0,.5, 0)),
                                (1/6, ( 1, 0, 0, 1)),
-                               (1/3, (.5,.5, 0, 1)),
-                               (1/2, ( 0, 1, 0, 1)),
-                               (2/3, ( 0,.5,.5, 1)),
+                               (2/6, (.5,.5, 0, 1)),
+                               (3/6, ( 0, 1, 0, 1)),
+                               (4/6, ( 0,.5,.5, 1)),
                                (5/6, ( 0, 0, 1, 1)),
-                               (  1, (.5, 0,.5, 0)) ])
+                               (6/6, (.5, 0,.5, 0)) ])
 
 def main():
     import math
