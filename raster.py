@@ -145,7 +145,6 @@ class Raster_24RGB(Raster):
         data_size = self.height * (row_bytes + row_padding)
         file_size = data_size + WINDOWS_BITMAP_HEADER.size
         
-        print(data_offset, file_size)
         file.write(WINDOWS_BITMAP_HEADER.pack("BM",
                                               file_size,
                                               "jeba", # unused
@@ -242,10 +241,9 @@ def main():
         y = size / 2 + size / 3 * math.sin(theta)
         
         r, g, b, a = mah_spectrum(theta % 1)
+        image.speck([x, y], [r * 255, g * 255, b * 255], a)
         
-        image.speck([x, y], [r, g, b], a)
-        
-        theta += 0.5
+        theta += 0.1
     
     print("Image generated.")
     
