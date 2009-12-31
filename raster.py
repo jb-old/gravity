@@ -71,11 +71,11 @@ class Raster(Object):
 
 
                               # type # value # description
-                              # ---- # ----- # ----------- 
+                              # ---- # ----- # -----------
 WINDOWS_BITMAP_HEADER = Struct( "2s" #  "BM" # "magic number" file type identifier
                                 "I"  #       # file size (bytes)
                                 "I"  #     0 # reserved/unused
-                                "I"  #    54 # bitmap data offset
+                                "I"  #    54 # bitmap data offset = self.size
                                 "I"  #    40 # size of second [part of] header
                                 "i"  #       # width of image
                                 "i"  #       # -height of image
@@ -87,9 +87,9 @@ WINDOWS_BITMAP_HEADER = Struct( "2s" #  "BM" # "magic number" file type identifi
                                 "i"  #     0 # vertical resolution (pixels/metre)
                                 "I"  #     0 # number of colors in of color palette
                                 "I"  #     0 # number of "important" colors in color palette
-                                )
+                                ) # THIS IS TWO BYTES TOO BIG WHY?
 
-# the color palette comes after the headrer if you have one, but as we
+# the color palette comes after the header if you have one, but as we
 # haven't we go straight to the bitmap data. 24- and 32-bit are one
 # byte per channel per pixel, so it's simply that, except:
 # 
@@ -130,7 +130,7 @@ class Raster_24RGB(Raster):
         self.point((x + 1, y - 1), color, opacity / 4, pen)
         self.point((x + 1, y + 1), color, opacity / 4, pen)
     
-    def write_bmp(self, file):
+    def write_bmp(self, file, offset=0):
         row_bytes = self.width * 3
         
         if row_bytes % 4 == 0:
@@ -138,13 +138,25 @@ class Raster_24RGB(Raster):
         else:
             row_padding = 4 - (row_bytes % 4)
         
+        data_offset = WINDOWS_BITMAP_HEADER.size + offset
         data_size = self.height * (3 * self.width + row_padding)
         file_size = data_size + 54
-        
-        file.write(WINDOWS_BITMAP_HEADER.pack("BM", file_size, 0, 54,
-                                              40, self.width, -self.height, 1,
-                                              24, 0, data_size,
-                                              0, 0, 0, 0))
+        print(data_offset, file_size)
+        file.write(WINDOWS_BITMAP_HEADER.pack("BM",
+                                              file_size,
+                                              0, # reserved
+                                              data_offset,
+                                              40, # size of 2nd half of header
+                                              self.width,
+                                              -self.height,
+                                              1, # color planes
+                                              24, # bits per pixel
+                                              0, # compression type
+                                              data_size,
+                                              0, # h-res, pixels/metre
+                                              0, # v-res, pixels/metre
+                                              0, # colors in palette
+                                              0)) # important colors in palette
 
         for y in range(self.height):
             for x in range(self.width):
