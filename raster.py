@@ -126,6 +126,9 @@ class Raster_24RGB(Raster):
         pen = pen or self.pen
         coordinates = [ int(_) for _ in coordinates ]
 
+        if self[coordinates] is None:
+            return # OOB
+        
         # colors may be given as floats (0 to 1)
         # or as integers (0 to 255)
         
@@ -133,6 +136,7 @@ class Raster_24RGB(Raster):
             color = [ int(c * 255 * not_darkness) for c in color ]
         elif not_darkness != 1: # assumed int
             color = [ int(c * not_darkness) for c in color ]
+
         self[coordinates] = [ int(pen(old, color[channel]))
                               for channel, old
                               in enumerate(self[coordinates]) ]
@@ -234,20 +238,15 @@ mah_spectrum = RGBA_Gradient([ (  0, (.5, 0,.5, 0)),
 def main():
     import math
     
-    size = 32
+    size = 128
     image = Raster_24RGB(size, size, fill=[0, 0, 0], pen=PEN_MAX)
     theta = 0
 
     print("Image instantiated.")
     
-    while theta < 3 / 4 * math.pi:
-        x = size / 2 + size / 3 * math.cos(theta)
-        y = size / 2 + size / 3 * math.sin(theta)
-
-        r, g, b, a = mah_spectrum(theta % 1)
-        image.speck([x, y], [r, g, b], a)
-        
-        theta += 0.1
+    for p in range(size):
+        r, g, b, a = mah_spectrum(p / size)
+        image.speck([p, p], [r, g, b], a)
     
     print("Image generated.")
     
