@@ -70,7 +70,7 @@ class Raster(Object):
         self.data[i:i + self.color_fmt.size] = self.color_fmt.pack(*color)
 
 
-                              # size # value # description
+                              # type # value # description
                               # ---- # ----- # ----------- 
 WINDOWS_BITMAP_HEADER = Struct( "2s" #  "BM" # "magic number" file type identifier
                                 "I"  #       # file size (bytes)
@@ -118,9 +118,8 @@ class Raster_24RGB(Raster):
         pen = pen or self.pen
         x, y = coordinates
         
-        # how about Graph() with .to_raster
         self.point(coordinates, color, opacity, pen)
-
+        
         self.point((x, y - 1), color, opacity / 2, pen)
         self.point((x - 1, y), color, opacity / 2, pen)
         self.point((x + 1, y), color, opacity / 2, pen)
@@ -131,31 +130,29 @@ class Raster_24RGB(Raster):
         self.point((x + 1, y - 1), color, opacity / 4, pen)
         self.point((x + 1, y + 1), color, opacity / 4, pen)
     
-    def write_bmp(self, f):
-        width, height = self.width, self.height
-        row_bytes = width * 3
+    def write_bmp(self, file):
+        row_bytes = self.width * 3
         
         if row_bytes % 4 == 0:
             row_padding = 0
         else:
             row_padding = 4 - (row_bytes % 4)
         
-        data_size = 3 * height * (width + row_padding)
+        data_size = self.height * (3 * self.width + row_padding)
         file_size = data_size + 54
+        
+        file.write(WINDOWS_BITMAP_HEADER.pack("BM", file_size, 0, 54,
+                                              40, self.width, -self.height, 1,
+                                              24, 0, data_size,
+                                              0, 0, 0, 0))
 
-        f.write(WINDOWS_BITMAP_HEADER.pack(
-                "BM", file_size, 0, 54,
-                40, width, -height, 1,
-                24, 0, data_size,
-                0, 0, 0, 0))
-
-        for y in range(height):
-            for x in range(width):
+        for y in range(self.height):
+            for x in range(self.width):
                 BGR = reversed(self[x, y])
-                f.write(bytes(BGR))
+                file.write(bytes(BGR))
                 
             for i in range(row_padding):
-                f.write(b"\x00")
+                file.write(b"\x00")
 
 class RGBA_Gradient(object):
     def __init__(self, data):
@@ -219,8 +216,10 @@ def main():
     import math
     
     size = 32
-    image = Raster_24RGB(size, size, pen=PEN_MAX)
+    image = Raster_24RGB(size, size, fill=[0, 0, 0], pen=PEN_MAX)
     theta = 0
+
+    print("Image instantiated.")
     
     while theta < 2 * math.pi:
         x = size / 2 + size / 3 * math.cos(theta)
@@ -231,11 +230,19 @@ def main():
         image.speck([x, y], [r, g, b], a)
         
         theta += 0.5
-
+    
+    print("Image generated.")
+    
     with open("out.bmp", "wb") as o:
         image.write_bmp(o)
-
-    "Woah"
+    
+    print("Image written.")
+    
+    from subprocess import Popen
+    
+    print("Attempting to $(convert) image to png.")
+    # identifies errors in our file
+    Popen(["convert", "out.bmp", "out.png"]).communicate()
 
 if __name__ == "__main__":
     import sys
