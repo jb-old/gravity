@@ -109,15 +109,6 @@ def main(size=36):
         light([ x + 1, y - 1], qrtr)
         light([ x + 1, y + 1], qrtr)
 
-    theta = 0
-    
-    while theta < 2 * math.pi:
-        x = size / 2 + size / 3 * math.cos(theta)
-        y = size / 2 + size / 3 * math.sin(theta)
-        print(theta, mah_spectrum(theta))
-        speck([x, y], mah_spectrum(theta))
-
-        theta += 0.5
 
     out = open("out.bmp", "wb")
     out.write(_24b_bmp_header(size, size))
