@@ -72,11 +72,14 @@ class Raster(Object):
 
                               # type # value # description
                               # ---- # ----- # -----------
-WINDOWS_BITMAP_HEADER = Struct( "2s" #  "BM" # "magic number" file type identifier
+WINDOWS_BITMAP_HEADER = Struct( "<"          # (struct little-endian indicator)
+                                "2s" #    BM # "magic number" file type identifier
                                 "I"  #       # file size (bytes)
-                                "I"  #     0 # reserved/unused
+                                "4s" #  jeba # reserved/unused
                                 "I"  #    54 # bitmap data offset = self.size
-                                "I"  #    40 # size of second [part of] header
+                                             # (above is BMP header)
+                                             # (below is DIB header)
+                                "I"  #    40 # size of DIB header (bytes)
                                 "i"  #       # width of image
                                 "i"  #       # -height of image
                                 "H"  #     1 # color planes used
@@ -87,7 +90,7 @@ WINDOWS_BITMAP_HEADER = Struct( "2s" #  "BM" # "magic number" file type identifi
                                 "i"  #     0 # vertical resolution (pixels/metre)
                                 "I"  #     0 # number of colors in of color palette
                                 "I"  #     0 # number of "important" colors in color palette
-                                ) # THIS IS TWO BYTES TOO BIG WHY?
+                                )
 
 # the color palette comes after the header if you have one, but as we
 # haven't we go straight to the bitmap data. 24- and 32-bit are one
@@ -139,12 +142,13 @@ class Raster_24RGB(Raster):
             row_padding = 4 - (row_bytes % 4)
         
         data_offset = WINDOWS_BITMAP_HEADER.size + offset
-        data_size = self.height * (3 * self.width + row_padding)
-        file_size = data_size + 54
+        data_size = self.height * (row_bytes + row_padding)
+        file_size = data_size + WINDOWS_BITMAP_HEADER.size
+        
         print(data_offset, file_size)
         file.write(WINDOWS_BITMAP_HEADER.pack("BM",
                                               file_size,
-                                              0, # reserved
+                                              "jeba", # unused
                                               data_offset,
                                               40, # size of 2nd half of header
                                               self.width,
