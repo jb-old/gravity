@@ -35,6 +35,9 @@ PEN_DIFF    = lambda old, new: abs(old - new)
 PEN_XOR     = lambda old, new: old ^ new
 
 class Raster(Object):
+    color_fmt = Struct("B")
+    default_fill = [ 0 ]
+    
     default_pen = staticmethod(PEN_REPLACE)
     
     def initialize(self, width, height, fill=None, pen=None):
@@ -53,7 +56,7 @@ class Raster(Object):
         if x < 0 or x >= self.width or y < 0 or y >= self.height:
             return None
 
-        i = y * self.width + x * self.color_fmt.size
+        i = (y * self.width + x) * self.color_fmt.size
         
         return self.color_fmt.unpack(self.data[i:i + self.color_fmt.size])
     
@@ -63,7 +66,7 @@ class Raster(Object):
         if x < 0 or x >= self.width or y < 0 or y >= self.height:
             return
         
-        i = y * self.width + x * self.color_fmt.size
+        i = (y * self.width + x) * self.color_fmt.size
         
         self.data[i:i + self.color_fmt.size] = self.color_fmt.pack(*color)
 
@@ -219,8 +222,8 @@ class RGBA_Gradient(object):
         else:
             first_balance = (point - first_point) / (second_point - first_point)
             second_balance = 1 - first_balance
-
-        first_balance, second_balance = second_balance, first_balance
+            
+            first_balance, second_balance = second_balance, first_balance # why?
         
         result = tuple( first_balance * first +
                         second_balance * second for first, second in zip(first_color,
@@ -229,7 +232,7 @@ class RGBA_Gradient(object):
         return result
 
 # fades out to purple on either end, runs the RGB spectrum between, so
-# that all channels will be available at full not_darkness. this is so that
+# that all channels will be available at full opacity. this is so that
 # i can take the min for each channel when painting a new color and
 # have something which remains in the same point for the complete
 # duration appear white.
