@@ -274,7 +274,11 @@ def main():
         r, g, b, a = mah_spectrum(theta / (3 / 2 * math.pi))
         
         image.dot([x, y], [r, g, b], a) # draw orbiting dot
-        image.dot([size / 2, size / 2], [r, g, b], 1, radius=24) # draw planet
+
+        planet_x = ((size / 2) * 5 + x) / 6
+        planet_y = ((size / 2) * 5 + y) / 6
+        
+        image.dot([planet_x, planet_y], [r, g, b], a, radius=24) # draw planet
         
         theta += 0.1
     
