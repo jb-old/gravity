@@ -87,14 +87,14 @@ class Raster(Object):
                 distance = math.sqrt(x_o ** 2 +
                                      y_o ** 2)
                 
-                delta = distance - radius
+                far_out = distance - radius
                 
-                if delta >= .5:
+                if far_out <= -.5:
                     self.point((x + x_o,
                                 y + y_o), color, not_darkness, pen)
-                elif delta > 0:
+                elif far_out < .5:
                     self.point((x + x_o,
-                                y + y_o), color, not_darkness * delta, pen)
+                                y + y_o), color, not_darkness * (far_out + .5), pen)
     
                               # type # value # description
                               # ---- # ----- # -----------
