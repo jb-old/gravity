@@ -273,7 +273,9 @@ def main():
 
         r, g, b, a = mah_spectrum(theta / (3 / 2 * math.pi))
         image.dot([x, y], [r, g, b], a)
-
+        
+        image.dot([size / 2, size / 2], [r, g, b], .75, radius=24)
+        
         theta += 0.1
     
     for p in range(size + 1):
