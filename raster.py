@@ -85,8 +85,8 @@ class Raster(Object):
         pen = pen or self.pen
         x, y = coordinates
 
-        offsets = range(math.floor(-radius),
-                        math.ceil(radius) + 1)
+        offsets = range(math.floor(-radius) - 1,
+                        math.ceil(radius) + 2)
         
         for x_o in offsets:
             for y_o in offsets:
@@ -99,7 +99,7 @@ class Raster(Object):
                 elif distance < radius + .5:
                     self.point((x + x_o,
                                 y + y_o), color, (not_darkness
-                                                  * (distance - radius + .5)), pen)
+                                                  * (radius - distance + .5)), pen)
     
                               # type # value # description
                               # ---- # ----- # -----------
