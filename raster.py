@@ -27,6 +27,7 @@ except ImportError:
         __call__    = lambda self, *a, **kw: self.call(*a, **kw)
 
 from struct import Struct
+import math
 
 # Pens are applied on a per-channel basis.
 PEN_REPLACE = lambda old, new: new
@@ -72,22 +73,24 @@ class Raster(Object):
         
         self.data[i:i + self.color_fmt.size] = self.color_fmt.pack(*color)
 
-    def speck(self, coordinates, color, not_darkness=1, pen=None):
+    def dot(self, coordinates, color, not_darkness=1, pen=None, radius=.5):
+        """Draws a dot/circle of the chosen radius. Default, .5, is just a point."""
+
         pen = pen or self.pen
         x, y = coordinates
-        
-        self.point(coordinates, color, not_darkness, pen)
-        
-        self.point((x, y - 1), color, not_darkness / 2, pen)
-        self.point((x - 1, y), color, not_darkness / 2, pen)
-        self.point((x + 1, y), color, not_darkness / 2, pen)
-        self.point((x, y + 1), color, not_darkness / 2, pen)
-        
-        self.point((x - 1, y - 1), color, not_darkness / 4, pen)
-        self.point((x - 1, y + 1), color, not_darkness / 4, pen)
-        self.point((x + 1, y - 1), color, not_darkness / 4, pen)
-        self.point((x + 1, y + 1), color, not_darkness / 4, pen)
 
+        offsets = range(math.floor(-radius),
+                        math.ceil(radius) + 1)
+        
+        for x_o in offsets:
+            for y_o in offsets:
+                distance = math.sqrt(x_o ** 2 +
+                                     y_o ** 2)
+
+                if distance <= radius:
+                    self.point((x + x_o,
+                                y + y_o), color, not_darkness, pen)
+    
                               # type # value # description
                               # ---- # ----- # -----------
 WINDOWS_BITMAP_HEADER = Struct( "<"          # (struct little-endian indicator)
@@ -248,8 +251,6 @@ mah_spectrum = RGBA_Gradient([ (0/6, (.5, 0,.5, 0)),
                                (6/6, (.5, 0,.5, 0)) ])
 
 def main():
-    import math
-    
     size = 128
     image = Raster_24RGB(size, size, fill=[0, 0, 0], pen=PEN_MAX)
     theta = 0
@@ -261,13 +262,13 @@ def main():
         y = size / 2 + size / 3 * math.sin(theta - 1)
 
         r, g, b, a = mah_spectrum(theta / (3 / 2 * math.pi))
-        image.speck([x, y], [r, g, b], a)
+        image.dot([x, y], [r, g, b], a)
 
         theta += 0.1
     
     for p in range(size + 1):
         r, g, b, a = mah_spectrum(p / size)
-        image.speck([p, p], [r, g, b], a)
+        image.dot([p, p], [r, g, b], a)
     
     print("Image generated.")
     
