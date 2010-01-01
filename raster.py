@@ -73,7 +73,7 @@ class Raster(Object):
         
         self.data[i:i + self.color_fmt.size] = self.color_fmt.pack(*color)
 
-    def dot(self, coordinates, color, not_darkness=1, pen=None, radius=2):
+    def dot(self, coordinates, color, not_darkness=1, pen=None, radius=1):
         """Draws a dot/circle of the chosen radius. Default, .5, is just a point."""
 
         pen = pen or self.pen
@@ -90,7 +90,7 @@ class Raster(Object):
                 if distance <= radius - .5:
                     self.point((x + x_o,
                                 y + y_o), color, not_darkness, pen)
-                elif distance <= radius + .5:
+                elif distance < radius + .5:
                     self.point((x + x_o,
                                 y + y_o), color, not_darkness * (distance - radius + .5), pen)
     
