@@ -272,20 +272,16 @@ def main():
         y = size / 2 + size / 3 * math.sin(theta - 1)
 
         r, g, b, a = mah_spectrum(theta / (3 / 2 * math.pi))
-        image.dot([x, y], [r, g, b], a)
         
-        image.dot([size / 2, size / 2], [r, g, b], .75, radius=24)
+        image.dot([x, y], [r, g, b], a) # draw orbiting dot
+        image.dot([size / 2, size / 2], [r, g, b], 1, radius=24) # draw planet
         
         theta += 0.1
     
     for p in range(size + 1):
         r, g, b, a = mah_spectrum(p / size)
-        image.dot([p, p], [r, g, b], a)
-
-    for y in range(size):
-        if (y - 10) % 40 <= 20:
-            break
-            image.dot([size // 2, y], [1.0] * 3, (y - 10) % 20 / 20)
+        
+        image.dot([p, p], [r, g, b], a) # draw diagonal line
     
     print("Image generated.")
     
