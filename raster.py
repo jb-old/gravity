@@ -56,7 +56,8 @@ class Raster(Object):
     def get_item(self, x_y):
         x, y = x_y
         
-        if x < 0 or x >= self.width or y < 0 or y >= self.height:
+        if not(0 <= x < self.width and
+               0 <= y < self.height):
             return None
 
         i = (y * self.width + x) * self.color_fmt.size
@@ -66,16 +67,21 @@ class Raster(Object):
     def set_item(self, x_y, color):
         x, y = x_y
         
-        if x < 0 or x >= self.width or y < 0 or y >= self.height:
+        if not(0 <= x < self.width and
+               0 <= y < self.height):
             return
         
         i = (y * self.width + x) * self.color_fmt.size
         
         self.data[i:i + self.color_fmt.size] = self.color_fmt.pack(*color)
 
-    def dot(self, coordinates, color, not_darkness=1, pen=None, radius=1):
+    def dot(self, coordinates, color, not_darkness=1, pen=None, radius=1.5):
         """Draws a dot/circle of the chosen radius. Default, .5, is just a point."""
 
+        # This seems to produce wrong results at
+        # radius = 1. Diagonals seem brighter than
+        # horzontal/verticals. Shouldn't be so?
+        
         pen = pen or self.pen
         x, y = coordinates
 
@@ -92,7 +98,8 @@ class Raster(Object):
                                 y + y_o), color, not_darkness, pen)
                 elif distance < radius + .5:
                     self.point((x + x_o,
-                                y + y_o), color, not_darkness * (distance - radius + .5), pen)
+                                y + y_o), color, (not_darkness
+                                                  * (distance - radius + .5)), pen)
     
                               # type # value # description
                               # ---- # ----- # -----------
@@ -272,6 +279,10 @@ def main():
     for p in range(size + 1):
         r, g, b, a = mah_spectrum(p / size)
         image.dot([p, p], [r, g, b], a)
+
+    for y in range(size):
+        if (y - 10) % 40 <= 20:
+            image.dot([size // 2, y], [1.0] * 3, (y - 10) % 20 / 20)
     
     print("Image generated.")
     
