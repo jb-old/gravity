@@ -75,18 +75,14 @@ class Raster(Object):
         
         self.data[i:i + self.color_fmt.size] = self.color_fmt.pack(*color)
 
-    def dot(self, coordinates, color, not_darkness=1, pen=None, radius=1.5):
+    def dot(self, coordinates, color, not_darkness=1, pen=None, radius=.5):
         """Draws a dot/circle of the chosen radius. Default, .5, is just a point."""
-
-        # This seems to produce wrong results at
-        # radius = 1. Diagonals seem brighter than
-        # horzontal/verticals. Shouldn't be so?
         
         pen = pen or self.pen
         x, y = coordinates
 
         offsets = range(math.floor(-radius) - 1,
-                        math.ceil(radius) + 2)
+                        math.ceil ( radius) + 2)
         
         for x_o in offsets:
             for y_o in offsets:
@@ -273,19 +269,19 @@ def main():
 
         r, g, b, a = mah_spectrum(theta / (3 / 2 * math.pi))
         
-        image.dot([x, y], [r, g, b], a) # draw orbiting dot
+        image.dot([x, y], [r, g, b], a, radius=1.5) # draw orbiting dot
 
         planet_x = ((size / 2) * 5 + x) / 6
         planet_y = ((size / 2) * 5 + y) / 6
         
-        image.dot([planet_x, planet_y], [r, g, b], a, radius=24) # draw planet
+        image.dot([planet_x, planet_y], [r, g, b], a, radius=23.5) # draw planet
         
         theta += 0.1
     
     for p in range(size + 1):
         r, g, b, a = mah_spectrum(p / size)
         
-        image.dot([p, p], [r, g, b], a) # draw diagonal line
+        image.dot([p, p], [r, g, b], a, radius=1.5) # draw diagonal line
     
     print("Image generated.")
     
