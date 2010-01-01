@@ -252,13 +252,13 @@ class RGBA_Gradient(object):
 # have something which remains in the same point for the complete
 # duration appear white.
                              # point,( r, g, b, a)
-mah_spectrum = RGBA_Gradient([ (0/6, (.5,0.,.5,0.)),
-                               (1/6, (1.,0.,0.,1.)),
-                               (2/6, (.5,.5,0.,1.)),
-                               (3/6, (0.,1.,0.,1.)),
-                               (4/6, (0.,.5,.5,1.)),
-                               (5/6, (0.,0.,1.,1.)),
-                               (6/6, (.5,0.,.5,0.)) ])
+mah_spectrum = RGBA_Gradient([ (0/6, ( .5, .0, .5, .0)),
+                               (1/6, (1. , .0, .0,1. )),
+                               (2/6, ( .5, .5, .0,1. )),
+                               (3/6, ( .0, .0,1. ,1. )),
+                               (4/6, ( .0, .5, .5,1. )),
+                               (5/6, ( .0, .0, .0,1. )),
+                               (6/6, ( .5, .0, .5, .0)) ])
 
 def main():
     size = 128
