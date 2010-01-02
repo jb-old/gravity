@@ -257,32 +257,29 @@ mah_spectrum = RGBA_Gradient([ (0/6, (  .5,  .0,  .5,  .0)),
                                (6/6, (  .5,  .0,  .5, .0)) ])
 
 def main():
-    size = 128
+    size = 512
     image = Raster_24RGB(size, size, fill=[0, 0, 0], pen=PEN_MAX)
     theta = 0
 
     print("Image instantiated.")
     
     while theta < 3 / 2 * math.pi:
-        x = size / 2 + size / 3 * math.cos(theta - 1)
-        y = size / 2 + size / 3 * math.sin(theta - 1)
-
+        opposite_theta = theta + math.pi
+        
+        x = size / 2 + size * 2 / 5 * math.cos(theta - 1)
+        y = size / 2 + size * 2 / 5 * math.sin(theta - 1)
+        
         r, g, b, a = mah_spectrum(theta / (3 / 2 * math.pi))
         
-        image.dot([x, y], [r, g, b], a, radius=1.5) # draw orbiting dot
+        image.dot([x, y], [r, g, b], a, radius=size/42) # draw orbiting dot
 
-        planet_x = ((size / 2) * 5 + x) / 6
-        planet_y = ((size / 2) * 5 + y) / 6
+        planet_x = size / 2 + (size / 24) * math.cos(opposite_theta - 1)
+        planet_y = size / 2 + (size / 24) * math.sin(opposite_theta - 1)
         
-        image.dot([planet_x, planet_y], [r, g, b], a, radius=23.5) # draw planet
+        image.dot([planet_x, planet_y], [r, g, b], a, radius=size/8) # draw planet
         
-        theta += 0.1
-    
-    for p in range(size + 1):
-        r, g, b, a = mah_spectrum(p / size)
-        
-        image.dot([p, p], [r, g, b], a, radius=1.5) # draw diagonal line
-    
+        theta += 0.2
+
     print("Image generated.")
     
     with open("out.bmp", "wb") as o:
