@@ -264,11 +264,28 @@ mah_spectrum = RGBA_Gradient([ (0/6, (  .5,  .0,  .5,  .0)),
                                (6/6, (  .5,  .0,  .5, .0)) ])
 
 def main():
+    import random
+    
     size = 512
     image = Raster_24RGB(size, size, fill=[0, 0, 0], pen=PEN_MAX)
     theta = 0
 
     print("Image instantiated.")
+    
+    def generate_stars(raster):
+        for n in range(100):
+            x = random.random() * raster.width
+            y = random.random() * raster.height
+
+            p = (n + 1) / 100
+            rc = lambda: random.random() * p + (1 - p)
+            
+            r, b, o = [ rc() for _ in range(3) ]
+            g = min(r, b) # never dominate color
+            
+            raster.dot([x, y], [r, g, b], o, radius=.6 + random.random() * .5)
+
+    generate_stars(image)
     
     while theta < 3 / 2 * math.pi:
         opposite_theta = theta + math.pi
@@ -279,14 +296,14 @@ def main():
         r, g, b, a = mah_spectrum(theta / (3 / 2 * math.pi))
         
         image.dot([x, y], [r, g, b], a, radius=size/42) # draw orbiting dot
-
+        
         planet_x = size / 2 + (size / 36) * math.cos(opposite_theta - 1)
         planet_y = size / 2 + (size / 36) * math.sin(opposite_theta - 1)
         
         image.dot([planet_x, planet_y], [r, g, b], a, radius=size/8) # draw planet
         
         theta += 0.2
-
+    
     print("Image generated.")
     
     with open("out.bmp", "wb") as o:
