@@ -75,7 +75,7 @@ class Raster(Object):
         
         self.data[i:i + self.color_fmt.size] = self.color_fmt.pack(*color)
 
-    def dot(self, coordinates, color, not_darkness=1, pen=None, radius=.5):
+    def dot(self, coordinates, color, opacity=1, pen=None, radius=.5):
         """Draws a dot/circle of the chosen radius. Default, .5, is just a point."""
         
         pen = pen or self.pen
@@ -91,10 +91,10 @@ class Raster(Object):
                 
                 if distance <= radius - .5:
                     self.point((x + x_o,
-                                y + y_o), color, not_darkness, pen)
+                                y + y_o), color, opacity, pen)
                 elif distance < radius + .5:
                     self.point((x + x_o,
-                                y + y_o), color, (not_darkness
+                                y + y_o), color, (opacity
                                                   * (radius - distance + .5)), pen)
     
                               # type # value # description
@@ -136,24 +136,31 @@ class Raster_24RGB(Raster):
     color_fmt = Struct("BBB")
     default_fill = 0, 0, 0
     
-    def point(self, coordinates, color, not_darkness=1, pen=None):
+    def point(self, coordinates, color, opacity=1, pen=None):
         pen = pen or self.pen
         coordinates = [ int(_) for _ in coordinates ]
-
-        if self[coordinates] is None:
+        
+        previous = self[coordinates]
+        
+        if previous is None:
             return # OOB
         
         # colors may be given as floats (0 to 1)
         # or as integers (0 to 255)
         
-        if isinstance(color[0], float):
-            color = [ int(c * 255 * not_darkness) for c in color ]
-        elif not_darkness != 1: # assumed int
-            color = [ int(c * not_darkness) for c in color ]
-
-        self[coordinates] = [ int(pen(old, color[channel]))
-                              for channel, old
-                              in enumerate(self[coordinates]) ]
+        if opacity != 1:
+            if isinstance(color[0], float):
+                color = [ int(f * 255 * opacity + (1 - opacity) * p)
+                          for f, p in zip(color, previous) ]
+            else:
+                color = [ int(i * opacity + (1 - opacity) * p)
+                          for i, p in zip(color, previous) ]
+        elif isinstance(color[0], float):
+                color = [ int(f * 255) for f in color ]
+        
+        self[coordinates] = [ int(pen(current, old))
+                              for current, old
+                              in zip(color, previous) ]
     
     def write_bmp(self, file, offset=0):
         row_bytes = self.width * 3
@@ -273,8 +280,8 @@ def main():
         
         image.dot([x, y], [r, g, b], a, radius=size/42) # draw orbiting dot
 
-        planet_x = size / 2 + (size / 24) * math.cos(opposite_theta - 1)
-        planet_y = size / 2 + (size / 24) * math.sin(opposite_theta - 1)
+        planet_x = size / 2 + (size / 36) * math.cos(opposite_theta - 1)
+        planet_y = size / 2 + (size / 36) * math.sin(opposite_theta - 1)
         
         image.dot([planet_x, planet_y], [r, g, b], a, radius=size/8) # draw planet
         
