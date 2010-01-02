@@ -289,18 +289,24 @@ def main():
     
     while theta < 3 / 2 * math.pi:
         for _ in range(5):
-            x = size / 2 + size * 2 / 5 * math.cos(theta - 1)
-            y = size / 2 + size * 2 / 5 * math.sin(theta - 1)
+            x = size / 2 + size * 2 / 5 * math.cos(theta + 4)
+            y = size / 2 + size * 2 / 5 * math.sin(theta + 4)
             
             r, g, b, a = mah_spectrum(theta / (3 / 2 * math.pi))
             
             image.dot([x, y], [r, g, b], a, radius=size/42) # draw orbiting dot
 
             theta += .10
+
+            
+        image.dot([ size / 4,
+                    size / 6 + size / 6 * 4 * theta / ( 3/2*math.pi) ],
+                  [r,g,b], a, radius=size/32)
+        
         opposite_theta = theta + math.pi
         
-        planet_x = size / 2 + (size / 36) * math.cos(opposite_theta - 1)
-        planet_y = size / 2 + (size / 36) * math.sin(opposite_theta - 1)
+        planet_x = size / 2 + (size / 36) * math.cos(opposite_theta + 4)
+        planet_y = size / 2 + (size / 36) * math.sin(opposite_theta + 4)
         
         image.dot([planet_x, planet_y], [r, g, b], a, radius=size/8) # draw planet
     
