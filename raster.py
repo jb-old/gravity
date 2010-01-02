@@ -288,21 +288,21 @@ def main():
     generate_stars(image)
     
     while theta < 3 / 2 * math.pi:
+        for _ in range(5):
+            x = size / 2 + size * 2 / 5 * math.cos(theta - 1)
+            y = size / 2 + size * 2 / 5 * math.sin(theta - 1)
+            
+            r, g, b, a = mah_spectrum(theta / (3 / 2 * math.pi))
+            
+            image.dot([x, y], [r, g, b], a, radius=size/42) # draw orbiting dot
+
+            theta += .10
         opposite_theta = theta + math.pi
-        
-        x = size / 2 + size * 2 / 5 * math.cos(theta - 1)
-        y = size / 2 + size * 2 / 5 * math.sin(theta - 1)
-        
-        r, g, b, a = mah_spectrum(theta / (3 / 2 * math.pi))
-        
-        image.dot([x, y], [r, g, b], a, radius=size/42) # draw orbiting dot
         
         planet_x = size / 2 + (size / 36) * math.cos(opposite_theta - 1)
         planet_y = size / 2 + (size / 36) * math.sin(opposite_theta - 1)
         
         image.dot([planet_x, planet_y], [r, g, b], a, radius=size/8) # draw planet
-        
-        theta += 0.2
     
     print("Image generated.")
     
