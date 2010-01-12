@@ -256,12 +256,12 @@ class RGBA_Gradient(object):
 # duration appear white.
                              # point,( r, g, b, a)
 mah_spectrum = RGBA_Gradient([ (0/6, (  .5,  .0,  .5,  .0)),
-                               (1/6, ( 1. ,  .0,  .0, 1. )),
-                               (2/6, (  .5,  .5,  .0, 1. )),
-                               (3/6, (  .0, 1.0,  .0, 1. )),
-                               (4/6, (  .0,  .5,  .5, 1. )),
-                               (5/6, (  .0,  .0, 1.0, 1. )),
-                               (6/6, (  .5,  .0,  .5, .0)) ])
+                               (1/6, (  .0,  .0, 1.0, 1.0)),
+                               (2/6, (  .0,  .5,  .5, 1.0)),
+                               (3/6, (  .0, 1.0,  .0, 1.0)),
+                               (4/6, (  .5,  .5,  .0, 1.0)),
+                               (5/6, ( 1.0,  .0,  .0, 1.0)),
+                               (6/6, (  .5,  .0,  .5,  .0)) ])
 
 def main():
     import random
@@ -284,9 +284,11 @@ def main():
             g = min(r, b) # never dominate color
             
             raster.dot([x, y], [r, g, b], o, radius=.6 + random.random() * .5)
-
+    
+    print("Rendering background stars...")
     generate_stars(image)
     
+    print("Rendering foreground objects...")
     while theta < 3 / 2 * math.pi:
         for _ in range(5):
             x = size / 2 + size * 2 / 5 * math.cos(theta + 4)
