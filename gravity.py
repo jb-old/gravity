@@ -26,10 +26,10 @@ class Vector(object):
         self.components[index] = value
     
     def __add__(self, vector):
-        return type(self)(a + b for (a, b) in (self.components, vector.components))
+        return type(self)(a + b for (a, b) in zip(self.components, vector.components))
     
     def __sub__(self, vector):
-        return type(self)(a - b for (a, b) in (self.components, vector.components))
+        return type(self)(a - b for (a, b) in zip(self.components, vector.components))
     
     def __mul__(self, scalar):
         return type(self)(x * scalar for x in self.components)
