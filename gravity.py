@@ -81,12 +81,12 @@ class Object(object):
                 .format(type(self), self.mass, self.displacement, self.velocity))
 
 class System(list):
-    def advanced(self, dt, frames=1, G=6.67428e-11):
+    def advanced(self, dt, frames=1, G=6.67428e-11, post_frame_callback=None):
         current = System(self)
 
         dt_per_frame = dt / frames
         
-        for _ in range(frames):
+        for f in range(frames):
             next = System()
             
             for old_object in current:
@@ -108,6 +108,10 @@ class System(list):
                             new_object.velocity = new_object.velocity + acceleration * dt_per_frame
                 new_object.displacement = new_object.displacement + new_object.velocity
                 next.append(new_object)
+            
+            if post_frame_callback:
+                post_frame_callback(f, current, next)
+            
             current = next
         
         return current # Python not having tail recursion optimization is stupid.
@@ -164,27 +168,22 @@ def main(in_filename="-", out_filename="-"):
         sys.stderr.write("Rendering background \"stars\"...\n")
         image.starify()
 
-        # maybe have a callback in advance after each frame?
-        for f in range(input_dict["frames"]):
-            if f != 0: # first frame is input, don't calculate
-                sys.stderr.write("Calculating frame {}...           \r".format(f))
-                sys.stderr.flush()
-                system = system.advanced(frame_dt, G=input_dict["G"])
-            
-            r, g, b, a = raster.mah_spectrum(f / (frames - 1) if frames > 1 else .5)
-            
-            sys.stderr.write("Calculuated, rendering frame {}...\r".format(f))
+        def callback(frame, old, new):
+            r, g, b, a = raster.mah_spectrum(frame / (frames - 1) if frames > 1 else .5)
+            sys.stderr.write("Calculuated, rendering frame {}...\r".format(frame))
             sys.stderr.flush()
             
             if a:
-                for object in system:
+                for object in new:
                     dot_position = object.displacement + offset
                     dot_radius = object.mass ** .5 * 2
-
+                    
                     image.dot(dot_position, [r, g, b], a, radius=dot_radius)
         
+        callback(0, system, None) # to draw input frame
+        system = system.advanced(input_dict["dt"], input_dict["frames"], input_dict["G"], callback)
+
         sys.stderr.write("\n")
-        
         sys.stderr.write("Writing image to file...")
         image.write_bmp(out_file)
     
