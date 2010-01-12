@@ -94,7 +94,7 @@ class System(list):
                 
                 for other in current:
                     if other is not old_object:
-                        displacement = old_object.displacement - other.displacement
+                        displacement = other.displacement - old_object.displacement
                         
                         if displacement.magnitude > .5:
                             acceleration_magnitude = G * other.mass / displacement.magnitude ** 2
