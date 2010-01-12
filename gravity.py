@@ -31,7 +31,7 @@ class GravitySim(object):
 
             for other in self.state:
                 if other is not object:
-                    a_magnitude = other.mass / object.distance_from(other) ** 2
+                    a_magnitude = self.G * other.mass / object.distance_from(other) ** 2
                     
                     # this is almost certainly wrong:
                     x_delta = object.position[0] - other.position[0]
@@ -43,7 +43,7 @@ class GravitySim(object):
 
                     a = [a_x, a_y]
 
-                    new_velocity = map(sum, zip(a, new_velocity))
+                    new_velocity = list(map(sum, zip(a, new_velocity)))
             
             next_frame.append(Object(object.mass, new_velocity, map(sum, zip(object.position, new_velocity))))
         
@@ -61,8 +61,8 @@ def main(frames=100):
     frames = int(frames)
     
     sim = GravitySim([ Object(10, [ 0,  0], [ 0,  0]),
-                       Object( 2, [10,  0], [10, 10]) ],
-                     G=1.0) # only diffs reality by a factor of 150 billion
+                       Object( 2, [ 1, -1], [10, 10]) ],
+                     G=10) # only diffs reality by a factor of 150 billion
     
     width = 128
     height = 128
@@ -78,7 +78,8 @@ def main(frames=100):
         r, g, b, a = raster.mah_spectrum(f / (frames - 1))
         
         for object in sim.state:
-            image.dot(list(map(sum, zip(object.position, offset))), [r, g, b], a, radius=sqrt(object.mass) * 3)
+            image.dot([ object.position[0] + offset[0],
+                        object.position[1] + offset[1] ], [r, g, b], a, radius=sqrt(object.mass) * 3)
     
     with open("out.bmp", "wb") as o:
         image.write_bmp(o)
