@@ -1,5 +1,5 @@
 { "comment": "This example shows two opposite moons orbiting a planet.",
-  "dimensions": [ 128, 128 ],
+  "dimensions": [ 256, 256 ],
   "G": 10.0,
   "dt": 10,
   "frames": 500,

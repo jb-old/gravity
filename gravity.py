@@ -34,7 +34,7 @@ class Vector(object):
     def __mul__(self, scalar):
         return type(self)(x * scalar for x in self.components)
     
-    def __div__(self, scalar):
+    def __truediv__(self, scalar):
         return type(self)(x / scalar for x in self.components)
     
     def __neg__(self):
@@ -57,7 +57,7 @@ def V(*components):
     
     return Vector(components)
 
-from copy import copy
+from copy import copy, deepcopy
 
 class Object(object):
     """A kinematic Object with mass, displacement and velocity."""
@@ -70,7 +70,7 @@ class Object(object):
     @classmethod
     def from_dict(cls, source_dict,
                   default_dict = { "m": 1, "d": [ 0, 0 ], "v": [ 0, 0 ], "comment": None }):
-        input_dict = copy(default_dict)
+        input_dict = deepcopy(default_dict)
         input_dict.update(source_dict)
         
         return cls(input_dict["m"], input_dict["d"], input_dict["v"])
@@ -89,7 +89,7 @@ class System(list):
             next = System()
             
             for old_object in self:
-                new_object = copy(old_object)
+                new_object = deepcopy(old_object)
                 
                 for other in self:
                     if other is not old_object:
@@ -105,7 +105,7 @@ class System(list):
                                              acceleration_magnitude * (1 - x_to_y))
                             
                             new_object.velocity += acceleration * dt_per_frame
-                new_object.displacement += new_object.velocity
+                new_object.displacement = new_object.displacement + new_object.velocity
                 next.append(new_object)
             current = next
         
@@ -162,8 +162,6 @@ def main(in_filename="-", out_filename="-"):
         image = raster.Raster_24RGB(width, height, fill=[0, 0, 0], pen=raster.PEN_MAX)
         sys.stderr.write("Rendering background \"stars\"...\n")
         image.starify()
-
-        offset[1] = 0
         
         for f in range(input_dict["frames"]):
             sys.stderr.write("Calculating frame {}...           \r".format(f))
