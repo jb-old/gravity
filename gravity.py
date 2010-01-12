@@ -163,7 +163,7 @@ def main(in_filename="-", out_filename="-"):
         sys.stderr.write("Rendering background \"stars\"...\n")
         image.starify()
 
-        offset[1] /= 2
+        offset[1] = 0
         
         for f in range(input_dict["frames"]):
             sys.stderr.write("Calculating frame {}...           \r".format(f))
