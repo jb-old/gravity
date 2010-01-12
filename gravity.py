@@ -31,13 +31,13 @@ class GravitySim(object):
 
             for other in self.state:
                 if other is not object:
-                    a_magnitude = self.G * other.mass / object.distance_from(other) ** 2
+                    a_magnitude = self.G * other.mass / (object.distance_from(other) ** 2)
                     
                     # this is almost certainly wrong:
                     x_delta = object.position[0] - other.position[0]
                     y_delta = object.position[1] - other.position[1]
-                    x_portion = x_delta / abs(x_delta + y_delta)
-                    y_portion = y_delta / abs(x_delta + y_delta)
+                    x_portion = x_delta / ( abs(x_delta) + abs(y_delta))
+                    y_portion = y_delta / ( abs(x_delta) + abs(y_delta))
                     a_x = a_magnitude * x_portion
                     a_y = a_magnitude * y_portion
 
@@ -62,7 +62,7 @@ def main(frames=100):
     
     sim = GravitySim([ Object(10, [ 0,  0], [ 0,  0]),
                        Object( 2, [ 1, -1], [10, 10]) ],
-                     G=10) # only diffs reality by a factor of 150 billion
+                     G=100) # only diffs reality by a factor of 150 billion
     
     width = 128
     height = 128
