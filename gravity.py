@@ -74,7 +74,6 @@ class Object(object):
                   default_dict = { "m": 1, "d": [ 0, 0 ], "v": [ 0, 0 ], "comment": None }):
         input_dict = deepcopy(default_dict)
         input_dict.update(source_dict)
-        
         return cls(input_dict["m"], input_dict["d"], input_dict["v"])
 
     def __repr__(self):
@@ -100,11 +99,11 @@ class System(list):
                         if displacement.magnitude > .5:
                             acceleration_magnitude = G * other.mass / displacement.magnitude ** 2
                             
-                            x_to_y = displacement[0] / sum(abs(v) for v in displacement)
-                            y_to_x = displacement[1] / sum(abs(v) for v in displacement)
+                            x_portion = displacement[0] / sum(abs(v) for v in displacement)
+                            y_portion = displacement[1] / sum(abs(v) for v in displacement)
                             
-                            acceleration = V(acceleration_magnitude * x_to_y,
-                                             acceleration_magnitude * y_to_x)
+                            acceleration = V(x_portion * acceleration_magnitude,
+                                             y_portion * acceleration_magnitude)
                             
                             new_object.velocity += acceleration * dt_per_frame
                 new_object.displacement = new_object.displacement + new_object.velocity
@@ -148,7 +147,7 @@ def main(in_filename="-", out_filename="-"):
                        "objects": [] } # objects in system we're rendering
     
     with in_file, out_file:
-        input_dict = input_defaults
+        input_dict = deepcopy(input_defaults)
         input_dict.update(json.load(in_file))
         
         width, height = dimensions = input_dict["dimensions"]
@@ -166,10 +165,10 @@ def main(in_filename="-", out_filename="-"):
         image.starify()
         
         for f in range(input_dict["frames"]):
-            sys.stderr.write("Calculating frame {}...           \r".format(f))
-            sys.stderr.flush()
-            
-            if f: system = system.advanced(frame_dt, G=input_dict["G"])
+            if f != 0: # first frame is input, don't calculate
+                sys.stderr.write("Calculating frame {}...           \r".format(f))
+                sys.stderr.flush()
+                system = system.advanced(frame_dt, G=input_dict["G"])
             
             r, g, b, a = raster.mah_spectrum(f / (frames - 1) if frames > 1 else .5)
             
