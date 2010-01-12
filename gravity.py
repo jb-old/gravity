@@ -9,7 +9,7 @@ class Vector(object):
     """A Vector value of any number of dimensions."""
     
     def __init__(self, components):
-        self.components = list(components)
+        self.components = deepcopy(list(components))
 
     @property
     def magnitude(self):
