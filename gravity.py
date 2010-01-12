@@ -36,8 +36,8 @@ class GravitySim(object):
                     # this is almost certainly wrong:
                     x_delta = object.position[0] - other.position[0]
                     y_delta = object.position[1] - other.position[1]
-                    x_portion = x_delta / ( abs(x_delta) + abs(y_delta))
-                    y_portion = y_delta / ( abs(x_delta) + abs(y_delta))
+                    x_portion = -x_delta / ( abs(x_delta) + abs(y_delta))
+                    y_portion = -y_delta / ( abs(x_delta) + abs(y_delta))
                     a_x = a_magnitude * x_portion
                     a_y = a_magnitude * y_portion
 
@@ -60,9 +60,9 @@ class GravitySim(object):
 def main(frames=100):
     frames = int(frames)
     
-    sim = GravitySim([ Object(10, [ 0,  0], [ 0,  0]),
-                       Object( 2, [ 1, -1], [10, 10]) ],
-                     G=100) # only diffs reality by a factor of 150 billion
+    sim = GravitySim([ Object(10, [ 0, +0.3], [ 0,  0]),
+                       Object( 2, [ 0, -1.5], [30,  0]) ],
+                     G=10, resolution=15) # only diffs reality by a factor of 150 billion
     
     width = 128
     height = 128
