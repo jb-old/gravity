@@ -1,48 +1,86 @@
 #!/usr/bin/env python3.1
-import sys
-import raster
-from math import sqrt # since you can just do **.5 why isn't this builtin?
-from math import sin, cos
+"""This module provides basic gravitional system simulation and
+visualization using the dubious math raster image module.
+
+You may encounter issues if you do not treat the types in this module
+as though they were immutable. Maybe not. This keeps changing."""
 
 class Vector(object):
+    """A Vector value of any number of dimensions."""
+    
     def __init__(self, components):
         self.components = list(components)
-    
-    def __getitem__(self, key):
-        return self.components[key]
-    
-    def __setitem__(self, key, value):
-        self.components[key] = value
-    
-    @staticmethod
-    def __component_shortcut( index):
-        def get(self): return self.components[index]
-        def set(self, value): self.components[index] = value
-        return property(get, set)
-    
-    x = __component_shortcut(0)
-    y = __component_shortcut(1)
-    z = __component_shortcut(2)
 
-V = lambda *components: Vector(components) # shortcut to define Vector((1, 2, 3)) as V(1, 2, 3)
+    def magnitude(self):
+        return sum(x ** 2 for x in self.components) ** (1/2)
+    
+    def __getitem__(self, index):
+        return self.components[index]
+    
+    def __setitem__(self, index, value):
+        self.components[index] = value
+    
+    def __add__(self, vector):
+        return type(self)(a + b for (a, b) in (self.components, vector.components))
+    
+    def __sub__(self, vector):
+        return type(self)(a - b for (a, b) in (self.components, vector.components))
+    
+    def __mul__(self, scalar):
+        return type(self)(x * scalar for x in self.components)
+    
+    def __div__(self, scalar):
+        return type(self)(x / scalar for x in self.components)
+    
+    def __neg__(self):
+        return type(self)(-x for x in self.components)
+
+    def __iter__(self): # meant for use in iterable instantation, not direct iteration
+        return iterator(self.components)
+
+    def __bool__(self):
+        return any(self)
+
+    def __eq__(self, other):
+        return self.components == other.components
+
+def V(*components):
+    """Shortcut for creating Vectors: V(x, y...) -> Vector((x, y...))"""
+    
+    return Vector(components)
 
 class Object(object):
-    def __init__(self, mass, velocity, position):
+    """A kinematic Object with mass, displacement and velocity."""
+    
+    def __init__(self, mass, position, velocity):
         self.mass = mass
-        self.velocity = list(velocity)
-        self.position = list(position)
+        self.displacement = Vector(displacement)
+        self.velocity = Vector(velocity)
 
-    def distance_from(self, other):
-        value = sum(map((lambda a_b: (a_b[0] - a_b[1]) ** 2), zip(self.position, other.position)))**.5
-        if value < .1:
-            value = .1
-        return value
+class System(list):
+    def advanced(self, dt_per_step, steps=1, G=6.67428e-11):
+        current = System(self)
 
-class GravitySim(object):
-    def __init__(self, initial_state, resolution=10, G=6.67428e-11):
-        self.frames = [ list(initial_state) ]
-        self.resolution = resolution # frames per second
-        self.G = G
+        for _ in range(steps):
+            next = System()
+            
+            for old_object in self:
+                new_object = copy(old_object)
+                
+                for other in self:
+                    if other is not old_object:
+                        displacement = old_object.displacement - other.displacement
+                        
+                        if displacement: # they aren't at the same position
+                            acceleration_magnitude = G * other.mass / displacement.magnitude ** 2
+                            
+                            
+                            
+                        
+            current = next
+        
+        return current # Python not having tail recursion optimization is stupid.
+                       # If it did, I'd implement this recursively and be happier.
     
     def tick(self):
         d_t = 1 / self.resolution
@@ -80,10 +118,13 @@ class GravitySim(object):
     def state(self):
         return self.frames[-1]
 
+import sys
+import raster
+
 def main(in_filename="-", out_filename="-"):
     in_ = open(in_filename,  "rt") if in_filename  != "-" else sys.stdin
     out = open(out_filename, "wb") if out_filename != "-" else sys.stdout.buffer
-    
+    # G = 
     import json
     
     with in_, out:
@@ -117,3 +158,4 @@ def main(in_filename="-", out_filename="-"):
     
 if __name__ == "__main__":
     sys.exit(main(*sys.argv[1:]))
+
