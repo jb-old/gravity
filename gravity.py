@@ -9,7 +9,7 @@ class Vector(object):
     """A Vector value of any number of dimensions."""
     
     def __init__(self, components):
-        self.components = deepcopy(list(components))
+        self.components = list(components)
 
     @property
     def magnitude(self):
@@ -40,7 +40,7 @@ class Vector(object):
     def __neg__(self):
         return type(self)(-x for x in self.components)
 
-    def __iter__(self): # meant for use in iterable instantation, not direct iteration
+    def __iter__(self):
         return iter(self.components)
 
     def __bool__(self):
@@ -51,6 +51,8 @@ class Vector(object):
 
     def __repr__(self):
         return "V({})".format(", ".join(repr(v) for v in self.components))
+
+    # use shifts to repr rotations cw and ccw
 
 def V(*components):
     """Shortcut for creating Vectors: V(x, y...) -> Vector((x, y...))"""
@@ -88,10 +90,10 @@ class System(list):
         for _ in range(frames):
             next = System()
             
-            for old_object in self:
+            for old_object in current:
                 new_object = deepcopy(old_object)
                 
-                for other in self:
+                for other in current:
                     if other is not old_object:
                         displacement = old_object.displacement - other.displacement
                         
@@ -102,7 +104,7 @@ class System(list):
                             y_to_x = displacement[1] / sum(abs(v) for v in displacement)
                             
                             acceleration = V(acceleration_magnitude * x_to_y,
-                                             acceleration_magnitude * (1 - x_to_y))
+                                             acceleration_magnitude * y_to_x)
                             
                             new_object.velocity += acceleration * dt_per_frame
                 new_object.displacement = new_object.displacement + new_object.velocity
@@ -178,7 +180,7 @@ def main(in_filename="-", out_filename="-"):
                 for object in system:
                     dot_position = object.displacement + offset
                     dot_radius = object.mass ** .5 * 2
-                    
+
                     image.dot(dot_position, [r, g, b], a, radius=dot_radius)
         
         sys.stderr.write("\n")
