@@ -13,7 +13,10 @@ class Object(object):
         self.position = list(position)
 
     def distance_from(self, other):
-        return sum(map((lambda a_b: (a_b[0] - a_b[1]) ** 2), zip(self.position, other.position)))**.5
+        value = sum(map((lambda a_b: (a_b[0] - a_b[1]) ** 2), zip(self.position, other.position)))**.5
+        if value < .1:
+            value = .1
+        return value
 
 class GravitySim(object):
     def __init__(self, initial_state, resolution=10, G=6.67428e-11):
@@ -36,8 +39,8 @@ class GravitySim(object):
                     # this is almost certainly wrong:
                     x_delta = object.position[0] - other.position[0]
                     y_delta = object.position[1] - other.position[1]
-                    x_portion = -x_delta / ( abs(x_delta) + abs(y_delta))
-                    y_portion = -y_delta / ( abs(x_delta) + abs(y_delta))
+                    x_portion = -x_delta / ( abs(x_delta) + abs(y_delta)) if x_delta or y_delta else 0
+                    y_portion = -y_delta / ( abs(x_delta) + abs(y_delta)) if x_delta or y_delta else 0
                     a_x = a_magnitude * x_portion
                     a_y = a_magnitude * y_portion
 
@@ -61,12 +64,12 @@ def main(frames=100):
     frames = int(frames)
     
     sim = GravitySim([ Object(10, [ 0, +0.3], [ 0,  0]),
-                       Object( 2, [ 0, -1.5], [30,  0]) ],
+                       Object( 2, [ 0, -1.5], [30,  0]), ],
+                       Object(5, [ -.1,   1], [-64, -64]) ],
                      G=10, resolution=15) # only diffs reality by a factor of 150 billion
     
-    width = 128
-    height = 128
-    offset = [+64, +64]
+    width = height = 192
+    offset = [ width / 2, height / 2]
                               
     image = raster.Raster_24RGB(width, height, fill=[0, 0, 0], pen=raster.PEN_MAX)
     
