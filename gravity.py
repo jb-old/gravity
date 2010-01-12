@@ -77,8 +77,8 @@ class Object(object):
         return cls(input_dict["m"], input_dict["d"], input_dict["v"])
 
     def __repr__(self):
-        return "{.__name__}(mass={!r}, displacement={!r}, velocity={!r})".format(type(self), self.mass,
-                                                                                 self.displacement, self.velocity)
+        return ("{.__name__}(mass={!r}, displacement={!r}, velocity={!r})"
+                .format(type(self), self.mass, self.displacement, self.velocity))
 
 class System(list):
     def advanced(self, dt, frames=1, G=6.67428e-11):
@@ -105,7 +105,7 @@ class System(list):
                             acceleration = V(x_portion * acceleration_magnitude,
                                              y_portion * acceleration_magnitude)
                             
-                            new_object.velocity += acceleration * dt_per_frame
+                            new_object.velocity = new_object.velocity + acceleration * dt_per_frame
                 new_object.displacement = new_object.displacement + new_object.velocity
                 next.append(new_object)
             current = next
@@ -121,12 +121,12 @@ def starify_raster(raster, n=200):
         x = random.random() * (raster.width + 4) - 2
         y = random.random() * (raster.height + 4) - 2
         
-        r, g, b = [ .5 + .25 * random.random() + .25 * random.random() for _ in range(3) ]
+        r, g, b = [ .6 + .2 * random.random() + .2 * random.random() for _ in range(3) ]
         
-        g = min(r, min(b, g)) # ensure green is never above red or blue
+        g = min(r, g, b) # ensure green is never above red or blue
         # maybe I could draw colours from a gradient instead, and use one limiting green by default?
         
-        raster.dot([x, y], [r, g, b], 1.0, radius=random.random() * 1.2)
+        raster.dot([x, y], [r, g, b], 1.0, radius=random.random())
 
 import sys
 import raster
@@ -163,7 +163,8 @@ def main(in_filename="-", out_filename="-"):
         image = raster.Raster_24RGB(width, height, fill=[0, 0, 0], pen=raster.PEN_MAX)
         sys.stderr.write("Rendering background \"stars\"...\n")
         image.starify()
-        
+
+        # maybe have a callback in advance after each frame?
         for f in range(input_dict["frames"]):
             if f != 0: # first frame is input, don't calculate
                 sys.stderr.write("Calculating frame {}...           \r".format(f))
