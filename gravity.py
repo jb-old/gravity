@@ -1,10 +1,30 @@
 #!/usr/bin/env python3.1
-"""a primitive and probably unrealistic gravity simluation, acting as a mock-up"""
-
 import sys
 import raster
 from math import sqrt # since you can just do **.5 why isn't this builtin?
 from math import sin, cos
+
+class Vector(object):
+    def __init__(self, components):
+        self.components = list(components)
+    
+    def __getitem__(self, key):
+        return self.components[key]
+    
+    def __setitem__(self, key, value):
+        self.components[key] = value
+    
+    @staticmethod
+    def __component_shortcut( index):
+        def get(self): return self.components[index]
+        def set(self, value): self.components[index] = value
+        return property(get, set)
+    
+    x = __component_shortcut(0)
+    y = __component_shortcut(1)
+    z = __component_shortcut(2)
+
+V = lambda *components: Vector(components) # shortcut to define Vector((1, 2, 3)) as V(1, 2, 3)
 
 class Object(object):
     def __init__(self, mass, velocity, position):
@@ -60,7 +80,15 @@ class GravitySim(object):
     def state(self):
         return self.frames[-1]
 
-def main(frames=100):
+def main(in_filename="-", out_filename="-"):
+    in_ = open(in_filename,  "rt") if in_filename  != "-" else sys.stdin
+    out = open(out_filename, "wb") if out_filename != "-" else sys.stdout.buffer
+    
+    import json
+    
+    with in_, out:
+        pass
+    
     frames = int(frames)
     
     sim = GravitySim([ Object(10, [ 0, +0.3], [ 0,  0]),
