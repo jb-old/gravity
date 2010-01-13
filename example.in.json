@@ -1,4 +1,4 @@
-{ "comment": "the earth-sun-mars system",
+{ "comment": "the sun and planets of our solar system out to jupiter. distances and sizes are scaled seperately",
   "dimensions": [ 256, 256 ],
   "dt": 5e7,
   "zoom": 3e-10,
