@@ -127,7 +127,7 @@ class System(list):
                     
                     displacement = other.displacement - object.displacement
                     
-                    if displacement.magnitude < object.radius + other.radius:
+                    if displacement.magnitude < min(object.radius, other.radius):
                         object_portion = object.mass / (object.mass + other.mass)
                         other_portion  = other.mass  / (other.mass + other.mass)
                         
