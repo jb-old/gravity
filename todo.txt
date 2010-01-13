@@ -1,0 +1,3 @@
+use itertools.combinations for combinations
+use itertools.slice on an infinite generator for frames
+use itertools.zip_longest(..., fillvalue=0) in vectors
