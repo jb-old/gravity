@@ -80,10 +80,11 @@ class Object(object):
     
     @classmethod
     def from_dict(cls, source_dict,
-                  default_dict = { "m": 1, "d": [ 0, 0 ], "v": [ 0, 0 ], "comment": None }):
+                  default_dict = { "m": 1, "d": [ 0, 0 ], "v": [ 0, 0 ],
+                                   "radius": None, "combining": True }):
         input_dict = deepcopy(default_dict)
         input_dict.update(source_dict)
-        return cls(input_dict["m"], input_dict["d"], input_dict["v"])
+        return cls(input_dict["m"], input_dict["d"], input_dict["v"], input_dict["radius"], input_dict["combining"])
 
     def __repr__(self):
         return ("{.__name__}(mass={!r}, displacement={!r}, velocity={!r})"
@@ -177,13 +178,13 @@ def main(in_filename="-", out_filename="-"):
     
     # later I should add many more rendering control options to this, but this will do to start
     input_defaults = { "comment": None, # it's a comment, ignored
-                       "dimensions": [ 256, 256 ], # size of output image
-                       "G": 6.67428e-11, # gravitational constant (you will want to set this, ha ha maybe I should fix that)
-                       "dt": 1.0, # seconds elasped in render
-                       "frames": 100, # physics and drawing "frames" to use
+                       "dimensions": [ 256, 256 ], # size of output image, and unzoomed view area in metres
+                       "G": 6.67428e-11, # gravitational constant
+                       "dt": 5e7, # duration in render in seconds
+                       "frames": 500, # physics and drawing "frames" to use
                        "objects": [], # objects in system we're rendering
                        "centre": [0, 0], # centre of view
-                       "zoom": 1 } # factor of magnification
+                       "zoom": e-10 } # factor of magnification
     # todo: make values realistic
     
     with in_file, out_file:
@@ -194,7 +195,7 @@ def main(in_filename="-", out_filename="-"):
         offset = V(width / 2 + .5, height / 2 + .5)
         
         frames = input_dict["frames"]
-        frame_dt = input_dict["dt"] / (input_dict["frames"] - 1) or 1
+        frame_dt = input_dict["dt"] / ((input_dict["frames"] - 1) or 1)
         centre = Vector(input_dict["centre"])
         zoom = input_dict["zoom"]
         
@@ -218,7 +219,7 @@ def main(in_filename="-", out_filename="-"):
                     
                     image.dot(dot_position, [r, g, b], a, radius=dot_radius)
         
-        callback(0, system, None) # to draw input frame
+        callback(0, None, system) # to draw input frame
         system = system.advanced(input_dict["dt"], input_dict["frames"], input_dict["G"], callback)
 
         sys.stderr.write("\n")
