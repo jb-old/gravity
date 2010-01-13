@@ -106,7 +106,7 @@ class System(list):
                                              y_portion * acceleration_magnitude)
                             
                             new_object.velocity = new_object.velocity + acceleration * dt_per_frame
-                new_object.displacement = new_object.displacement + new_object.velocity
+                new_object.displacement = new_object.displacement + new_object.velocity * dt_per_frame
                 next.append(new_object)
             
             if post_frame_callback:
