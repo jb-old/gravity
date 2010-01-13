@@ -177,11 +177,14 @@ def main(in_filename="-", out_filename="-"):
     
     # later I should add many more rendering control options to this, but this will do to start
     input_defaults = { "comment": None, # it's a comment, ignored
-                       "dimensions": [ 256, 256 ], # size of output image, should have some zoom/positioning
+                       "dimensions": [ 256, 256 ], # size of output image
                        "G": 6.67428e-11, # gravitational constant (you will want to set this, ha ha maybe I should fix that)
                        "dt": 1.0, # seconds elasped in render
                        "frames": 100, # physics and drawing "frames" to use
-                       "objects": [] } # objects in system we're rendering
+                       "objects": [], # objects in system we're rendering
+                       "centre": [0, 0], # centre of view
+                       "zoom": 1 } # factor of magnification
+    # todo: make values realistic
     
     with in_file, out_file:
         input_dict = deepcopy(input_defaults)
@@ -192,6 +195,8 @@ def main(in_filename="-", out_filename="-"):
         
         frames = input_dict["frames"]
         frame_dt = input_dict["dt"] / (input_dict["frames"] - 1) or 1
+        centre = Vector(input_dict["centre"])
+        zoom = input_dict["zoom"]
         
         sys.stderr.write("Loading input system...\n")
         system = System(Object.from_dict(d) for d in input_dict["objects"])
@@ -199,8 +204,8 @@ def main(in_filename="-", out_filename="-"):
         sys.stderr.write("Instantiating image...\n")
         image = raster.Raster_24RGB(width, height, fill=[0, 0, 0], pen=raster.PEN_MAX)
         sys.stderr.write("Rendering background \"stars\"...\n")
-        image.starify()
-
+        image.starify(int((width * height) / 100))
+        
         def callback(frame, old, new):
             r, g, b, a = raster.mah_spectrum(frame / (frames - 1) if frames > 1 else .5)
             sys.stderr.write("Calculuated, rendering frame {}...\r".format(frame))
@@ -208,8 +213,8 @@ def main(in_filename="-", out_filename="-"):
             
             if a:
                 for object in new:
-                    dot_position = object.displacement + offset
-                    dot_radius = object.mass ** .5 * 2
+                    dot_position = (object.displacement - centre) * zoom + offset
+                    dot_radius = object.radius * zoom
                     
                     image.dot(dot_position, [r, g, b], a, radius=dot_radius)
         
