@@ -180,14 +180,14 @@ def main(in_filename="-", out_filename="-"):
     
     # later I should add many more rendering control options to this, but this will do to start
     input_defaults = { "comment": None, # it's a comment, ignored
-                       "dimensions": [ 1024, 512 ], # size of output image, and unzoomed view area in metres
+                       "dimensions": [ 1024, 768 ], # size of output image, and unzoomed view area in metres
                        "G": decimal.Decimal("6.67428e-11"), # gravitational constant
                        "dt": decimal.Decimal("60") * 60 * 24 * 365 / 2, # duration in render in seconds
-                       "frames": 5001, # drawing "frames" to use
+                       "frames": 15001, # drawing "frames" to use
                        "ticks_per_frame": 1, # how many physics frames to use for each image frame
                        "objects": [], # objects in system we're rendering
                        "centre": [0, 0], # centre of view
-                       "zoom": decimal.Decimal("1e-10") } # factor of magnification
+                       "zoom": decimal.Decimal("5e-9") } # factor of magnification
     # todo: make values realistic
     
     decimal.getcontext().prec = 92 # i bet this will be slow
