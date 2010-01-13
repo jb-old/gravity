@@ -33,10 +33,12 @@ class Vector(object):
     
     def __mul__(self, scalar):
         return type(self)(x * scalar for x in self.components)
+
+    __rmul__ = __mul__
     
     def __truediv__(self, scalar):
         return type(self)(x / scalar for x in self.components)
-    
+
     def __neg__(self):
         return type(self)(-x for x in self.components)
 
@@ -62,12 +64,19 @@ def V(*components):
 from copy import copy, deepcopy
 
 class Object(object):
-    """A kinematic Object with mass, displacement and velocity."""
+    """A non-elastic frictionless sphere in a vaccum, ha."""
     
-    def __init__(self, mass, displacement, velocity):
+    def __init__(self, mass, displacement, velocity, radius=None, combining=True):
         self.mass = mass
         self.displacement = Vector(displacement)
         self.velocity = Vector(velocity)
+        
+        if radius is None:
+            self.radius = 2 * self.mass ** (1/2)
+        else:
+            self.radius = radius
+
+        self.combining = bool(combining)
     
     @classmethod
     def from_dict(cls, source_dict,
@@ -108,7 +117,31 @@ class System(list):
                             new_object.velocity = new_object.velocity + acceleration * dt_per_frame
                 new_object.displacement = new_object.displacement + new_object.velocity * dt_per_frame
                 next.append(new_object)
-            
+
+            # combing colliding combining objects
+            for i, object in enumerate(next):
+                if object is None or not object.combining: continue
+                
+                for j, other in enumerate(next[i + 1:]):
+                    if other is None or not other.combining: continue
+                    
+                    displacement = other.displacement - object.displacement
+                    
+                    if displacement.magnitude < object.radius + other.radius:
+                        object_portion = object.mass / (object.mass + other.mass)
+                        other_portion  = other.mass  / (other.mass + other.mass)
+                        
+                        combined_object = Object(object.mass + other.mass,
+                                                 object_portion * object.displacement + other_portion * other.displacement,
+                                                 object_portion * object.velocity     + other_portion * other.velocity,
+                                                 (object.radius ** 2 + other.radius ** 2) ** (1/2))
+                        
+                        next[i] = object = combined_object
+                        next[i + 1 + j] = other = None
+
+            if None in next:
+                next = [ o for o in next if o is not None ]
+                        
             if post_frame_callback:
                 post_frame_callback(f, current, next)
             
