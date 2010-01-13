@@ -180,8 +180,9 @@ def main(in_filename="-", out_filename="-"):
     input_defaults = { "comment": None, # it's a comment, ignored
                        "dimensions": [ 1024, 512 ], # size of output image, and unzoomed view area in metres
                        "G": 6.67428e-11, # gravitational constant
-                       "dt": 60 * 60 * 24 * 356, # duration in render in seconds
-                       "frames": 500, # physics and drawing "frames" to use
+                       "dt": 60 * 60 * 24 * 365, # duration in render in seconds
+                       "frames": 1001, # drawing "frames" to use
+                       "ticks_per_frame": 5, # how many physics frames to use for each image frame
                        "objects": [], # objects in system we're rendering
                        "centre": [0, 0], # centre of view
                        "zoom": 1e-10 } # factor of magnification
@@ -208,6 +209,9 @@ def main(in_filename="-", out_filename="-"):
         image.starify(int((width * height) / 100))
         
         def callback(frame, old, new):
+            if frame % input_dict["ticks_per_frame"] != 0:
+                return
+            
             r, g, b, a = raster.mah_spectrum(frame / (frames - 1) if frames > 1 else .5)
             sys.stderr.write("Calculuated, rendering frame {}...\r".format(frame))
             sys.stderr.flush()
@@ -220,7 +224,7 @@ def main(in_filename="-", out_filename="-"):
                     image.dot(dot_position, [r, g, b], a, radius=dot_radius)
         
         callback(0, None, system) # to draw input frame
-        system = system.advanced(input_dict["dt"], input_dict["frames"], input_dict["G"], callback)
+        system = system.advanced(input_dict["dt"], input_dict["frames"] * input_dict["ticks_per_frame"], input_dict["G"], callback)
 
         sys.stderr.write("\n")
         sys.stderr.write("Writing image to file...")
