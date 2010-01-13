@@ -184,7 +184,7 @@ def main(in_filename="-", out_filename="-"):
                        "frames": 500, # physics and drawing "frames" to use
                        "objects": [], # objects in system we're rendering
                        "centre": [0, 0], # centre of view
-                       "zoom": e-10 } # factor of magnification
+                       "zoom": 1e-10 } # factor of magnification
     # todo: make values realistic
     
     with in_file, out_file:
