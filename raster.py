@@ -80,7 +80,13 @@ class Raster(Object):
         
         pen = pen or self.pen
         x, y = coordinates
-
+        
+        if (x + radius + 1 < 0 or
+            x - radius - 1 > self.width or
+            y + radius + 1 < 0 or
+            y - radius - 1 > self.height):
+            return # out of bounds
+        
         offsets = range(math.floor(-radius) - 1,
                         math.ceil ( radius) + 2)
         
