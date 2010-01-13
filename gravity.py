@@ -138,7 +138,7 @@ class System(list):
                         
                         next[i] = object = combined_object
                         next[i + 1 + j] = other = None
-
+            
             if None in next:
                 next = [ o for o in next if o is not None ]
                         

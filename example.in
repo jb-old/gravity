@@ -1,8 +1,6 @@
-{ "comment": "two opposite moons orbiting a planet, highly unrealistic",
-  "dimensions": [ 192, 192 ],
+{ "dimensions": [ 192, 192 ],
   "G": 10,
-  "dt": 200,
-  "frames": 501,
-  "objects": [ { "m": 10.0, "d": [  0.0,  0.0 ], "v": [  0.0,  0.5 ], "comment": "the planet" },
-               { "m":  2.0, "d": [ 30.0,  0.0 ], "v": [  0.0, -1.5 ], "comment": "right moon" },
-               { "m":  2.0, "d": [-30.0,  0.0 ], "v": [  0.0,  1.5 ], "comment": "left moon"  } ] }
+  "dt": 300,
+  "frames": 1001,
+  "objects": [ { "m": 10.0, "d": [-64.0,  0.0 ] },
+               { "m": 10.0, "d": [ 64.0,  0.0 ], "v": [ 0.3, 0.2 ] } ] }
