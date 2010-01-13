@@ -178,9 +178,9 @@ def main(in_filename="-", out_filename="-"):
     
     # later I should add many more rendering control options to this, but this will do to start
     input_defaults = { "comment": None, # it's a comment, ignored
-                       "dimensions": [ 256, 256 ], # size of output image, and unzoomed view area in metres
+                       "dimensions": [ 1024, 512 ], # size of output image, and unzoomed view area in metres
                        "G": 6.67428e-11, # gravitational constant
-                       "dt": 5e7, # duration in render in seconds
+                       "dt": 60 * 60 * 24 * 356, # duration in render in seconds
                        "frames": 500, # physics and drawing "frames" to use
                        "objects": [], # objects in system we're rendering
                        "centre": [0, 0], # centre of view
