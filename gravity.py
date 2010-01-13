@@ -155,7 +155,8 @@ import random
 
 def starify_raster(raster, n=200):
     """Draws background-ish "stars" on a Raster image."""
-    for _ in range(100):
+    
+    for _ in range(n):
         x = random.random() * (raster.width + 4) - 2
         y = random.random() * (raster.height + 4) - 2
         
@@ -181,8 +182,8 @@ def main(in_filename="-", out_filename="-"):
                        "dimensions": [ 1024, 512 ], # size of output image, and unzoomed view area in metres
                        "G": 6.67428e-11, # gravitational constant
                        "dt": 60 * 60 * 24 * 365, # duration in render in seconds
-                       "frames": 1001, # drawing "frames" to use
-                       "ticks_per_frame": 5, # how many physics frames to use for each image frame
+                       "frames": 501, # drawing "frames" to use
+                       "ticks_per_frame": 20, # how many physics frames to use for each image frame
                        "objects": [], # objects in system we're rendering
                        "centre": [0, 0], # centre of view
                        "zoom": 1e-10 } # factor of magnification
