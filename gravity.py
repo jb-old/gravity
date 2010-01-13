@@ -4,6 +4,7 @@ visualization using the dubious math raster image module.
 
 You may encounter issues if you do not treat the types in this module
 as though they were immutable. Maybe not. This keeps changing."""
+import decimal
 
 class Vector(object):
     """A Vector value of any number of dimensions."""
@@ -13,7 +14,7 @@ class Vector(object):
 
     @property
     def magnitude(self):
-        return sum(x ** 2 for x in self.components) ** (1/2)
+        return sum(x ** 2 for x in self.components) ** decimal.Decimal(".5")
     
     @magnitude.setter
     def magnitude(self, value):
@@ -72,7 +73,7 @@ class Object(object):
         self.velocity = Vector(velocity)
         
         if radius is None:
-            self.radius = 2 * self.mass ** (1/2)
+            self.radius = 2 * self.mass ** decimal.Decimal(".5")
         else:
             self.radius = radius
 
@@ -91,7 +92,7 @@ class Object(object):
                 .format(type(self), self.mass, self.displacement, self.velocity))
 
 class System(list):
-    def advanced(self, dt, frames=1, G=6.67428e-11, post_frame_callback=None):
+    def advanced(self, dt, frames=1, G=decimal.Decimal("6.67428e-11"), post_frame_callback=None):
         current = System(self)
 
         dt_per_frame = dt / frames
@@ -106,7 +107,7 @@ class System(list):
                     if other is not old_object:
                         displacement = other.displacement - old_object.displacement
                         
-                        if displacement.magnitude > .5:
+                        if displacement.magnitude > decimal.Decimal(".5"):
                             acceleration_magnitude = G * other.mass / displacement.magnitude ** 2
                             
                             x_portion = displacement[0] / sum(abs(v) for v in displacement)
@@ -135,7 +136,7 @@ class System(list):
                         combined_object = Object(object.mass + other.mass,
                                                  object_portion * object.displacement + other_portion * other.displacement,
                                                  object_portion * object.velocity     + other_portion * other.velocity,
-                                                 (object.radius ** 2 + other.radius ** 2) ** (1/2))
+                                                 (object.radius ** 2 + other.radius ** 2) ** decimal.Decimal(".5"))
                         
                         next[i] = object = combined_object
                         next[i + 1 + j] = other = None
@@ -165,7 +166,7 @@ def starify_raster(raster, n=200):
         g = min(r, g, b) # ensure green is never above red or blue
         # maybe I could draw colours from a gradient instead, and use one limiting green by default?
         
-        raster.dot([x, y], [r, g, b], 1.0, radius=random.random())
+        raster.dot([x, y], [r, g, b], random.random() * .7, radius=random.random())
 
 import sys
 import raster
@@ -180,21 +181,23 @@ def main(in_filename="-", out_filename="-"):
     # later I should add many more rendering control options to this, but this will do to start
     input_defaults = { "comment": None, # it's a comment, ignored
                        "dimensions": [ 1024, 512 ], # size of output image, and unzoomed view area in metres
-                       "G": 6.67428e-11, # gravitational constant
-                       "dt": 60 * 60 * 24 * 365, # duration in render in seconds
-                       "frames": 501, # drawing "frames" to use
-                       "ticks_per_frame": 20, # how many physics frames to use for each image frame
+                       "G": decimal.Decimal("6.67428e-11"), # gravitational constant
+                       "dt": decimal.Decimal("60") * 60 * 24 * 365 / 2, # duration in render in seconds
+                       "frames": 5001, # drawing "frames" to use
+                       "ticks_per_frame": 1, # how many physics frames to use for each image frame
                        "objects": [], # objects in system we're rendering
                        "centre": [0, 0], # centre of view
-                       "zoom": 1e-10 } # factor of magnification
+                       "zoom": decimal.Decimal("1e-10") } # factor of magnification
     # todo: make values realistic
+    
+    decimal.getcontext().prec = 92 # i bet this will be slow
     
     with in_file, out_file:
         input_dict = deepcopy(input_defaults)
-        input_dict.update(json.load(in_file))
+        input_dict.update(json.load(in_file, parse_float=decimal.Decimal, parse_int=decimal.Decimal))
         
         width, height = dimensions = input_dict["dimensions"]
-        offset = V(width / 2 + .5, height / 2 + .5)
+        offset = V(decimal.Decimal(width) / 2 + decimal.Decimal(".5"), decimal.Decimal(height) / 2 + decimal.Decimal(".5"))
         
         frames = input_dict["frames"]
         frame_dt = input_dict["dt"] / ((input_dict["frames"] - 1) or 1)
@@ -211,6 +214,8 @@ def main(in_filename="-", out_filename="-"):
         
         def callback(frame, old, new):
             if frame % input_dict["ticks_per_frame"] != 0:
+                sys.stderr.write("Calculate frame {}...              \r".format(frame))
+                sys.stderr.flush()
                 return
             
             r, g, b, a = raster.mah_spectrum(frame / (frames - 1) if frames > 1 else .5)
@@ -222,7 +227,7 @@ def main(in_filename="-", out_filename="-"):
                     dot_position = (object.displacement - centre) * zoom + offset
                     dot_radius = object.radius * zoom
                     
-                    image.dot(dot_position, [r, g, b], a, radius=dot_radius)
+                    image.dot(map(float, dot_position), [r, g, b], a, radius=float(dot_radius))
         
         callback(0, None, system) # to draw input frame
         system = system.advanced(input_dict["dt"], input_dict["frames"] * input_dict["ticks_per_frame"], input_dict["G"], callback)
