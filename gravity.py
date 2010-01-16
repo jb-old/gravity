@@ -95,8 +95,8 @@ def starify_raster(raster, n=None):
         n = int((raster.width * raster.height) * 0.01)
     
     for _ in range(n):
-        x = random.random() * (raster.width + 4) - 2
-        y = random.random() * (raster.height + 4) - 2
+        x = int(random.random() * (raster.width + 4) - 2)
+        y = int(random.random() * (raster.height + 4) - 2)
         
         r, g, b = [ .2 + .4 * random.random() + .4 * random.random() for _ in range(3) ]
         
@@ -151,8 +151,8 @@ def main(in_filename="-", out_filename="-"):
             if a:
                 for object in objects:
                     dot_position = (object.displacement - centre) * zoom + offset
-                    dot_radius = object.radius * zoom
-                    dot_radius = 1
+                    dot_radius = max(.5, object.radius * zoom)
+                    
                     image.dot(dot_position, [r, g, b], a, radius=dot_radius)
         
         sys.stderr.write("\n")
