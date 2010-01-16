@@ -91,13 +91,6 @@ class Raster(Object):
                         math.ceil ( radius) + 2)
 
         offset_error = radius - (math.floor(-radius) - 1)
-        # the float part of these is truncated
-        # when they're converted to ints
-        # in point, you need to fix that
-        # ktnxbai?
-
-        x_int, x_frac = divmod(x, 1)
-        y_int, y_frac = divmod(y, 1)
         
         x_int, x_frac = divmod(x, 1)
         y_int, y_frac = divmod(y, 1)
