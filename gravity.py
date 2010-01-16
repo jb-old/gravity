@@ -48,14 +48,16 @@ def simulate(current, time_step, G=6.67428e-11):
             displacement = other.displacement - object.displacement
             
             if displacement.magnitude > .5:
-                acceleration_magnitude = G * other.mass / displacement.magnitude ** 2
+                force_magnitude = G * object.mass * other.mass / displacement.magnitude ** 2
                 
                 x_portion = displacement[0] / sum(abs(v) for v in displacement)
                 y_portion = displacement[1] / sum(abs(v) for v in displacement)
                 
-                acceleration = V(x_portion * acceleration_magnitude,
-                                 y_portion * acceleration_magnitude)
-                object.velocity += acceleration * time_step
+                force = V(x_portion * force_magnitude,
+                          y_portion * force_magnitude)
+                
+                object.velocity += force / object.mass * time_step
+                other.velocity  -= force / other.mass  * time_step
         
         for object in current:
             object.displacement += object.velocity * time_step
@@ -96,7 +98,7 @@ def starify_raster(raster, n=None):
         x = random.random() * (raster.width + 4) - 2
         y = random.random() * (raster.height + 4) - 2
         
-        r, g, b = [ .6 + .2 * random.random() + .2 * random.random() for _ in range(3) ]
+        r, g, b = [ .2 + .4 * random.random() + .4 * random.random() for _ in range(3) ]
         
         g = min(r, g, b) # ensure green is never above red or blue
         # maybe I could draw colours from a gradient instead
@@ -112,7 +114,7 @@ def main(in_filename="-", out_filename="-"):
     input_defaults = { "comment": None, # it's a comment, ignored
                        "dimensions": [ 1024, 512 ], # size of output image, and unzoomed view area in metres
                        "G": 6.67428e-11, # gravitational constant
-                       "dt": 60 * 60 * 24 * 365, # duration in render in seconds
+                       "dt": 60 * 60 * 24 * 365 / 2, # duration in render in seconds
                        "frames": 501, # drawing "frames" to use
                        "objects": [], # objects in system we're rendering
                        "centre": [0, 0], # centre of view
