@@ -99,6 +99,9 @@ class Raster(Object):
         x_int, x_frac = divmod(x, 1)
         y_int, y_frac = divmod(y, 1)
         
+        x_int, x_frac = divmod(x, 1)
+        y_int, y_frac = divmod(y, 1)
+        
         for x_o in offsets:
             for y_o in offsets:
                 distance = math.sqrt((x_o - x_frac) ** 2 +
