@@ -1,9 +1,5 @@
 #!/usr/bin/env python3.1
-"""This module provides basic gravitional system simulation and
-visualization using the dubious math raster image module.
-
-You may encounter issues if you do not treat the types in this module
-as though they were immutable. Maybe not. This keeps changing."""
+import itertools
 
 class Vector(object):
     """A Vector value of any number of dimensions."""
@@ -26,10 +22,10 @@ class Vector(object):
         self.components[index] = value
     
     def __add__(self, vector):
-        return type(self)(a + b for (a, b) in zip(self.components, vector.components))
+        return type(self)(a + b for (a, b) in itertools.zip_longest(self.components, vector.components, fillvalue=0))
     
     def __sub__(self, vector):
-        return type(self)(a - b for (a, b) in zip(self.components, vector.components))
+        return type(self)(a - b for (a, b) in itertools.zip_longest(self.components, vector.components, fillvalue=0))
     
     def __mul__(self, scalar):
         return type(self)(x * scalar for x in self.components)
@@ -90,66 +86,55 @@ class Object(object):
         return ("{.__name__}(mass={!r}, displacement={!r}, velocity={!r})"
                 .format(type(self), self.mass, self.displacement, self.velocity))
 
-class System(list):
-    def advanced(self, dt, frames=1, G=6.67428e-11, post_frame_callback=None):
-        current = System(self)
-
-        dt_per_frame = dt / frames
+def simulate(current, time_step, G=6.67428e-11):
+    """From an initial situation, infinitely yield the following frames."""
+    dt_per_frame = dt / frames
+    
+    while True:
+        next = deepcopy(current)
         
-        for f in range(frames):
-            next = System()
+        for object, other in itertools.combinations(current):
+            displacement = other.displacement - object.displacement
             
-            for old_object in current:
-                new_object = deepcopy(old_object)
+            if displacement.magnitude > .5:
+                acceleration_magnitude = G * other.mass / displacement.magnitude ** 2
                 
-                for other in current:
-                    if other is not old_object:
-                        displacement = other.displacement - old_object.displacement
-                        
-                        if displacement.magnitude > .5:
-                            acceleration_magnitude = G * other.mass / displacement.magnitude ** 2
-                            
-                            x_portion = displacement[0] / sum(abs(v) for v in displacement)
-                            y_portion = displacement[1] / sum(abs(v) for v in displacement)
-                            
-                            acceleration = V(x_portion * acceleration_magnitude,
-                                             y_portion * acceleration_magnitude)
-                            
-                            new_object.velocity = new_object.velocity + acceleration * dt_per_frame
-                new_object.displacement = new_object.displacement + new_object.velocity * dt_per_frame
-                next.append(new_object)
-
-            # combing colliding combining objects
-            for i, object in enumerate(next):
-                if object is None or not object.combining: continue
+                x_portion = displacement[0] / sum(abs(v) for v in displacement)
+                y_portion = displacement[1] / sum(abs(v) for v in displacement)
                 
-                for j, other in enumerate(next[i + 1:]):
-                    if other is None or not other.combining: continue
+                acceleration = V(x_portion * acceleration_magnitude,
+                                 y_portion * acceleration_magnitude)
+                
+                object.velocity = new_object.velocity + acceleration * dt_per_frame
+        
+        for object in current:
+            object.displacement += new_object.velocity * dt_per_frame
+        
+        # combing colliding combining objects
+        for i, object in enumerate(next):
+            if object is None or not object.combining: continue
+            
+            for j, other in enumerate(next[i + 1:]):
+                if other is None or not other.combining: continue
+                
+                displacement = other.displacement - object.displacement
+                
+                if displacement.magnitude < min(object.radius, other.radius):
+                    object_portion = object.mass / (object.mass + other.mass)
+                    other_portion  = other.mass  / (other.mass + other.mass)
                     
-                    displacement = other.displacement - object.displacement
+                    combined_object = Object(object.mass + other.mass,
+                                             object_portion * object.displacement + other_portion * other.displacement,
+                                             object_portion * object.velocity     + other_portion * other.velocity,
+                                             (object.radius ** 2 + other.radius ** 2) ** (1/2))
                     
-                    if displacement.magnitude < min(object.radius, other.radius):
-                        object_portion = object.mass / (object.mass + other.mass)
-                        other_portion  = other.mass  / (other.mass + other.mass)
-                        
-                        combined_object = Object(object.mass + other.mass,
-                                                 object_portion * object.displacement + other_portion * other.displacement,
-                                                 object_portion * object.velocity     + other_portion * other.velocity,
-                                                 (object.radius ** 2 + other.radius ** 2) ** (1/2))
-                        
-                        next[i] = object = combined_object
-                        next[i + 1 + j] = other = None
+                    next[i] = object = combined_object
+                    next[i + 1 + j] = other = None
             
             if None in next:
                 next = [ o for o in next if o is not None ]
-                        
-            if post_frame_callback:
-                post_frame_callback(f, current, next)
-            
-            current = next
         
-        return current # Python not having tail recursion optimization is stupid.
-                       # If it did, I'd implement this recursively and be happier.
+        current = next
 
 import random
 
