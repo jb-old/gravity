@@ -164,8 +164,8 @@ def starify_raster(raster, n=200):
         
         g = min(r, g, b) # ensure green is never above red or blue
         # maybe I could draw colours from a gradient instead, and use one limiting green by default?
-        
-        raster.dot([x, y], [r, g, b], 1.0, radius=random.random())
+
+        raster.dot([x, y], [r, g, b], random.random() * .7, radius=random.random())
 
 import sys
 import raster
