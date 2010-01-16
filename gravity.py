@@ -112,7 +112,7 @@ def main(in_filename="-", out_filename="-"):
     out_file = open(out_filename, "wb") if out_filename != "-" else sys.stdout.buffer
     
     input_defaults = { "comment": None, # it's a comment, ignored
-                       "dimensions": [ 768, 1024 ], # size of output image, and unzoomed view area in metres
+                       "dimensions": [ 768, 768 ], # size of output image, and unzoomed view area in metres
                        "G": 6.67428e-11, # gravitational constant
                        "dt": 60 * 60 * 24 * 365 / 2, # duration in render in seconds
                        "frames": 501, # drawing "frames" to use
