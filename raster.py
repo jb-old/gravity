@@ -95,19 +95,22 @@ class Raster(Object):
         # when they're converted to ints
         # in point, you need to fix that
         # ktnxbai?
+
+        x_int, x_frac = divmod(x, 1)
+        y_int, y_frac = divmod(y, 1)
         
         for x_o in offsets:
             for y_o in offsets:
-                distance = math.sqrt(x_o ** 2 +
-                                     y_o ** 2)
+                distance = math.sqrt((x_o - x_frac) ** 2 +
+                                     (y_o - y_frac) ** 2)
                 
                 if distance <= radius - .5:
-                    self.point((x + x_o,
-                                y + y_o), color, opacity, pen)
+                    self.point((x_int + x_o,
+                                y_int + y_o), color, opacity, pen)
                 elif distance < radius + .5:
-                    self.point((x + x_o,
-                                y + y_o), color, (opacity
-                                                  * (radius - distance + .5)), pen)
+                    self.point((x_int + x_o,
+                                y_int + y_o), color, (opacity
+                                                      * (radius - distance + .5)), pen)
     
                               # type # value # description
                               # ---- # ----- # -----------
