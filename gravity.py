@@ -118,7 +118,7 @@ def main(in_filename="-", out_filename="-"):
                        "frames": 501, # drawing "frames" to use
                        "objects": [], # objects in system we're rendering
                        "centre": [0, 0], # centre of view
-                       "zoom": 1e-10 } # factor of magnification
+                       "zoom": 1e-9 } # factor of magnification
     
     with in_file, out_file:
         input_dict = deepcopy(input_defaults)
@@ -137,6 +137,7 @@ def main(in_filename="-", out_filename="-"):
         
         sys.stderr.write("Instantiating image...\n")
         image = raster.Raster_24RGB(width, height, fill=[0, 0, 0], pen=raster.PEN_MAX)
+        
         sys.stderr.write("Rendering background stars...\n")
         image.starify()
         
@@ -151,7 +152,7 @@ def main(in_filename="-", out_filename="-"):
                 for object in objects:
                     dot_position = (object.displacement - centre) * zoom + offset
                     dot_radius = object.radius * zoom
-                    
+                    dot_radius = 1
                     image.dot(dot_position, [r, g, b], a, radius=dot_radius)
         
         sys.stderr.write("\n")

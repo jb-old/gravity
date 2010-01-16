@@ -80,7 +80,7 @@ class Raster(Object):
         
         pen = pen or self.pen
         x, y = coordinates
-        
+
         if (x + radius + 1 < 0 or
             x - radius - 1 > self.width or
             y + radius + 1 < 0 or
@@ -89,6 +89,12 @@ class Raster(Object):
         
         offsets = range(math.floor(-radius) - 1,
                         math.ceil ( radius) + 2)
+
+        offset_error = radius - (math.floor(-radius) - 1)
+        # the float part of these is truncated
+        # when they're converted to ints
+        # in point, you need to fix that
+        # ktnxbai?
         
         for x_o in offsets:
             for y_o in offsets:
@@ -156,10 +162,10 @@ class Raster_24RGB(Raster):
         
         if opacity != 1:
             if isinstance(color[0], float):
-                color = [ int(f * 255 * opacity + (1 - opacity) * p)
+                color = [ int(f * 255 * opacity)
                           for f, p in zip(color, previous) ]
             else:
-                color = [ int(i * opacity + (1 - opacity) * p)
+                color = [ int(i * opacity)
                           for i, p in zip(color, previous) ]
         elif isinstance(color[0], float):
                 color = [ int(f * 255) for f in color ]
@@ -170,7 +176,7 @@ class Raster_24RGB(Raster):
     
     def write_bmp(self, file, offset=0):
         row_bytes = self.width * 3
-        
+       
         if row_bytes % 4 == 0:
             row_padding = 0
         else:

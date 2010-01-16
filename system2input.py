@@ -20,7 +20,7 @@ def system_to_input(system):
                        "radius": object_dict["mean radius"] }
             if "orbit" in object_dict:
                 object.update({ "v": V(0, object_dict["orbit"]["semi-major axis"] * 2 * PI / object_dict["orbit"]["period"]) + velocity_orbiting,
-                                "d": V(object_dict["orbit"]["semi-major axis"], 0) + position_orbiting })
+                                "d": V(object_dict["orbit"]["semi-major axis"] * (1 + object_dict["orbit"]["eccentricity"]), 0) + position_orbiting })
             else:
                 object["v"] = V(0, 0)
                 object["d"] = deepcopy(position_orbiting)
