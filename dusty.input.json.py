@@ -5,20 +5,20 @@ from random import random
 def r():
     return random() * 2 - 1
 
+N = 100
+d_max = 200
+v_max = 1
+
 def gen_object():
     return { "m": 1,
-             "d": [ r() * 200, r() * 200 ],
-             "v": [ r(), r() ],
+             "d": [ r() * d_max, r() * d_max ],
+             "v": [ r() * v_max, r() * v_max ],
              "radius": 2 }
 
-objects = [ gen_object() for _ in range(100) ]
-
-d = { "dimensions": [ 1024, 1024 ],
-      "zoom": 1,
-      "G": 1,
-      "dt": 600,
-      "frames": 3001,
-      "centre": [0, 0],
-      "objects": objects }
-
-print(json.dumps(d))
+print(json.dumps({ "dimensions": [ 1024, 1024 ],
+                   "zoom": 1,
+                   "G": 1,
+                   "dt": 600,
+                   "frames": 3001,
+                   "centre": [0, 0],
+                   "objects": [ gen_object() for _ in range(N) ] }))
