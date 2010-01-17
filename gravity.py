@@ -4,6 +4,7 @@ import itertools
 import json
 import random
 import sys
+import time
 
 from vector import Vector, V, sqrt
 import raster
@@ -112,15 +113,17 @@ def main(in_filename="-", out_filename="-"):
     out_file = open(out_filename, "wb") if out_filename != "-" else sys.stdout.buffer
     
     input_defaults = { "comment": None, # it's a comment, ignored
-                       "dimensions": [ 768, 768 ], # size of output image, and unzoomed view area in metres
+                       "dimensions": [ 1024, 1024 ], # size of output image, and unzoomed view area in metres
                        "G": 6.67428e-11, # gravitational constant
-                       "dt": 60 * 60 * 24 * 365 / 2, # duration in render in seconds
-                       "frames": 501, # drawing "frames" to use
+                       "dt": 60 * 60 * 24 * 365, # duration in render in seconds
+                       "frames": 3001, # drawing "frames" to use
                        "objects": [], # objects in system we're rendering
                        "centre": [0, 0], # centre of view
                        "zoom": 1e-9 } # factor of magnification
     
     with in_file, out_file:
+        start = time.time()
+        
         input_dict = deepcopy(input_defaults)
         input_dict.update(json.load(in_file))
         
@@ -159,6 +162,7 @@ def main(in_filename="-", out_filename="-"):
         sys.stderr.write("Writing image to file...")
         sys.stderr.flush()
         image.write_bmp(out_file)
+        sys.stderr.write("Complete. Total clock time elasped has been {:.1f}.\n".format(time.time))
     
 if __name__ == "__main__":
     sys.exit(main(*sys.argv[1:]))
