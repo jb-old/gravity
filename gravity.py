@@ -56,18 +56,33 @@ def simulate(current, time_step, G=6.67428e-11):
                 # 
                 # F_y = sqrt(force_magnitude ** 2
                 #            / ((displacement[0] / displacement[1]) ** 2 + 1))
-                # F_x = (displacement[x] / displacement[y]) * F_y
+                # F_x = (displacement[0] / displacement[1]) * F_y
                 #
                 # Determined from F_x^2 + F_y^2 = |F|^2
                 #             and F_x / F_y = delta_x / delta_y
                 # 
                 # See notebook 2010-Feb-14 note 2010-Feb-24#1.
+
+                if displacement[0] == 0:
+                    F_x = 0
+                    
+                    if displacement[1] > 0:
+                        F_y = force_magnitude
+                    else:
+                        F_y = -force_magnitude
+                elif displacement[1] == 0:
+                    F_y = 0
+
+                    if displacement[0] > 0:
+                        F_x = force_magnitude
+                    else:
+                        F_x = -force_magnitude
+                else:
+                    F_y = (force_magnitude ** 2
+                           / (displacement[0] / displacement[1]) ** 2 + 1) ** .5
+                    F_x = (displacement[0] / displacement[1]) * F_y
                 
-                x_portion = displacement[0] / sum(abs(v) for v in displacement)
-                y_portion = displacement[1] / sum(abs(v) for v in displacement)
-                
-                force = V(x_portion * force_magnitude,
-                          y_portion * force_magnitude)
+                force = V(F_x, F_y)
                 
                 object.velocity += force / object.mass * time_step
                 other.velocity  -= force / other.mass  * time_step
@@ -125,7 +140,7 @@ def main(in_filename="-", out_filename="-"):
     out_file = open(out_filename, "wb") if out_filename != "-" else sys.stdout.buffer
     
     input_defaults = { "comment": None, # it's a comment, ignored
-                       "dimensions": [ 1024, 1024 ], # size of output image, and unzoomed view area in metres
+                       "dimensions": [ 512, 512 ], # size of output image, and unzoomed view area in metres
                        "G": 6.67428e-11, # gravitational constant
                        "dt": 60 * 60 * 24 * 365, # duration in render in seconds
                        "frames": 3001, # drawing "frames" to use
@@ -153,8 +168,8 @@ def main(in_filename="-", out_filename="-"):
         sys.stderr.write("Instantiating image...\n")
         image = raster.Raster_24RGB(width, height, fill=[0, 0, 0], pen=raster.PEN_MAX)
         
-        sys.stderr.write("Rendering background stars...\n")
-        image.starify()
+        #sys.stderr.write("Rendering background stars...\n")
+        #image.starify()
         
         frames = itertools.islice(simulate(system, time_step, G=input_dict["G"]), frame_count)
         
@@ -174,7 +189,7 @@ def main(in_filename="-", out_filename="-"):
         sys.stderr.write("Writing image to file...")
         sys.stderr.flush()
         image.write_bmp(out_file)
-        sys.stderr.write("Complete. Total clock time elasped has been {:.1f}.\n".format(time.time))
+        sys.stderr.write("Complete. Total clock time elasped has been {:.1f}.\n".format(time.time() - start))
     
 if __name__ == "__main__":
     sys.exit(main(*sys.argv[1:]))
