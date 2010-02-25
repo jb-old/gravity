@@ -65,22 +65,24 @@ def simulate(current, time_step, G=6.67428e-11):
 
                 if displacement[0] == 0:
                     F_x = 0
-                    
-                    if displacement[1] > 0:
-                        F_y = force_magnitude
-                    else:
-                        F_y = -force_magnitude
+                    F_y = force_magnitude
                 elif displacement[1] == 0:
                     F_y = 0
-
-                    if displacement[0] > 0:
-                        F_x = force_magnitude
-                    else:
-                        F_x = -force_magnitude
+                    F_x = force_magnitude
                 else:
                     F_y = (force_magnitude ** 2
                            / (displacement[0] / displacement[1]) ** 2 + 1) ** .5
                     F_x = (displacement[0] / displacement[1]) * F_y
+                    
+                if displacement[0] > 0:
+                    F_x = +abs(F_x)
+                else:
+                    F_x = -abs(F_x)
+
+                if displacement[1] > 0:
+                    F_y = +abs(F_y)
+                else:
+                    F_y = -abs(F_y)
                 
                 force = V(F_x, F_y)
                 
@@ -140,9 +142,9 @@ def main(in_filename="-", out_filename="-"):
     out_file = open(out_filename, "wb") if out_filename != "-" else sys.stdout.buffer
     
     input_defaults = { "comment": None, # it's a comment, ignored
-                       "dimensions": [ 512, 512 ], # size of output image, and unzoomed view area in metres
+                       "dimensions": [ 1024, 1024 ], # size of output image, and unzoomed view area in metres
                        "G": 6.67428e-11, # gravitational constant
-                       "dt": 60 * 60 * 24 * 365, # duration in render in seconds
+                       "dt": 60 * 60 * 24 * 365 * .25, # duration in render in seconds
                        "frames": 3001, # drawing "frames" to use
                        "objects": [], # objects in system we're rendering
                        "centre": [0, 0], # centre of view
