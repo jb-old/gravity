@@ -50,6 +50,18 @@ def simulate(current, time_step, G=6.67428e-11):
             
             if displacement.magnitude > .5:
                 force_magnitude = G * object.mass * other.mass / displacement.magnitude ** 2
+
+                # this is wrong. what I think it actually should be
+                # is something like...
+                # 
+                # F_y = sqrt(force_magnitude ** 2
+                #            / ((displacement[0] / displacement[1]) ** 2 + 1))
+                # F_x = (displacement[x] / displacement[y]) * F_y
+                #
+                # Determined from F_x^2 + F_y^2 = |F|^2
+                #             and F_x / F_y = delta_x / delta_y
+                # 
+                # See notebook 2010-Feb-14 note 2010-Feb-24#1.
                 
                 x_portion = displacement[0] / sum(abs(v) for v in displacement)
                 y_portion = displacement[1] / sum(abs(v) for v in displacement)
