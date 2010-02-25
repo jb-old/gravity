@@ -71,7 +71,7 @@ def simulate(current, time_step, G=6.67428e-11):
                     F_x = force_magnitude
                 else:
                     F_y = (force_magnitude ** 2
-                           / (displacement[0] / displacement[1]) ** 2 + 1) ** .5
+                           / ((displacement[0] / displacement[1]) ** 2 + 1)) ** .5
                     F_x = (displacement[0] / displacement[1]) * F_y
                     
                 if displacement[0] > 0:
