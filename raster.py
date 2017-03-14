@@ -1,4 +1,4 @@
-#!/usr/bin/env python3.1
+#!/usr/bin/env python3
 """
 dubious math raster image module
 --------------------------------
@@ -185,9 +185,9 @@ class Raster_24RGB(Raster):
         data_size = self.height * (row_bytes + row_padding)
         file_size = data_size + WINDOWS_BITMAP_HEADER.size
         
-        file.write(WINDOWS_BITMAP_HEADER.pack("BM",
+        file.write(WINDOWS_BITMAP_HEADER.pack(b"BM",
                                               file_size,
-                                              "jeba", # unused
+                                              b"jeba", # unused
                                               data_offset,
                                               40, # size of 2nd half of header
                                               self.width,

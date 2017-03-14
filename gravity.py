@@ -1,4 +1,4 @@
-#!/usr/bin/env python3.1
+#!/usr/bin/env python3
 from copy import copy, deepcopy
 import itertools
 import json
